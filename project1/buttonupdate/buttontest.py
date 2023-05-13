@@ -1,11 +1,12 @@
 from flask import Flask, render_template, jsonify
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+import requests
 from bs4 import BeautifulSoup
 
 # 웹 페이지 URL
-url = 'https://www.safekorea.go.kr/idsiSFK/neo/main/main.html' 
-
+url_safekorea = 'https://www.safekorea.go.kr/idsiSFK/neo/main/main.html' 
+url_news = "https://www.yna.co.kr/theme/breaknews-history"
 # 크롬 웹 드라이버 경로 설정
 chrome_driver_path = 'project1/crawling/chromedriver_mac_arm64/chromedriver'  
 
@@ -19,13 +20,21 @@ app = Flask(__name__)
 def index():
     return render_template('main.html')
 
-@app.route('/update_content', methods=['POST'])
+@app.route('/update_news', methods=['POST'])
+def update_news():
+    response = requests.get(url_news)
+    soup = BeautifulSoup(response.content, 'html.parser')
+    new_content = str(soup.find_all('a', class_='tit-wrap')[0])
+    print(new_content)
+    return jsonify({"content": new_content})
+
+@app.route('/update_safekorea', methods=['POST'])
 def update_content():
     
 
     # 웹 드라이버 실행 및 웹 페이지 로드
     driver = webdriver.Chrome(executable_path=chrome_driver_path, options=chrome_options)
-    driver.get(url)
+    driver.get(url_safekorea)
 
     # 필요한 경우 JavaScript 함수 실행 (예: fn_search())
     #driver.execute_script('fn_search()')

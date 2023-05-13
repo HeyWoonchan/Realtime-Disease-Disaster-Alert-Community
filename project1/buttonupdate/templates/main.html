@@ -33,15 +33,31 @@
                     }
                 });
             });
+            $('#apimsgButton').on('click', function() {
+                $.ajax({
+                    url: '/api_disaster_update',
+                    type: 'POST',
+                    dataType: 'json',
+                    success: function(data) {
+                        $('#apimsgArea').text(JSON.stringify(data));
+                    },
+                    error: function(error) {
+                        console.log(error);
+                    }
+                });
+            });
         });
         
     </script>
 </head>
 <body>
-    <div id="contentArea">이곳의 내용이 변경됩니다.</div>
-    <button id="updateButton">내용 변경</button>
+    <div id="contentArea">안전청 웹 크롤링(celenium)</div>
+    <button id="updateButton">업데이트</button>
 
-    <div id="newsArea">뉴스속보 업데이트</div>
-    <button id="newsButton">뉴스속보</button>
+    <div id="newsArea">연합뉴스속보 업데이트</div>
+    <button id="newsButton">업데이트</button>
+
+    <div id="apimsgArea">api 재난문자</div>
+    <button id="apimsgButton">업데이트</button>
 </body>
 </html>

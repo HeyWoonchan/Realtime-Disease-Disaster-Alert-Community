@@ -2,6 +2,7 @@ from flask import Flask, render_template, jsonify
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import requests
+import json
 from bs4 import BeautifulSoup
 
 # 웹 페이지 URL
@@ -19,6 +20,13 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     return render_template('main.html')
+
+@app.route('/api_disaster_update', methods=['POST'])
+def get_disaster_messages():
+    
+    url = "http://apis.data.go.kr/1741000/DisasterMsg3/getDisasterMsg1List?serviceKey=DCEWLmC5o0ec6lJ%2FsTpRPUFLDnn8eH24STfRT5ZxbqR9BQBOk0i484ELM%2BBMVgC3YDKc8SiGrtkcs17Skrp97A%3D%3D&pageNo=1&numOfRows=10&type=json"
+    response = requests.get(url)
+    return response.json()
 
 @app.route('/update_news', methods=['POST'])
 def update_news():

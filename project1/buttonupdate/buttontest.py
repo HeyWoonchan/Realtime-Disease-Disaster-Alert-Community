@@ -117,4 +117,4 @@ def update_news():
 
 if __name__ == "__main__":
     create_table()
-    app.run(port=8000)
+    app.run(host='localhost', port=8023)

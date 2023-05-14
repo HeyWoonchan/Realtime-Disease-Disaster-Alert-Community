@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template,request, redirect,jsonify
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import requests
@@ -17,6 +17,19 @@ def get_msg_db():
     conn.close()
     return data
 
+DATABASE = 'comments.db'
+def create_table():
+    conn = sqlite3.connect(DATABASE)
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS comments (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT NOT NULL,
+                    content TEXT NOT NULL
+                )''')
+    conn.commit()
+    conn.close()
+
+
 
 url_news = "https://www.yna.co.kr/theme/breaknews-history"
 url_api = "http://apis.data.go.kr/1741000/DisasterMsg3/getDisasterMsg1List?serviceKey=DCEWLmC5o0ec6lJ%2FsTpRPUFLDnn8eH24STfRT5ZxbqR9BQBOk0i484ELM%2BBMVgC3YDKc8SiGrtkcs17Skrp97A%3D%3D&pageNo=1&numOfRows=3&type=json"
@@ -27,13 +40,30 @@ def index():
     return render_template('main.html')
 
 
-@app.route('/home')
+@app.route('/comment')
+
+@app.route('/home', methods=['GET', 'POST'])
 def home():
-
     
-    data = get_msg_db()
-
-    return render_template('index.html', data = data)
+    if request.method == 'POST':
+        name = request.form['name']
+        comment = request.form['comment']
+        if name and comment:
+            conn = sqlite3.connect(DATABASE)
+            c = conn.cursor()
+            c.execute("INSERT INTO comments (name, content) VALUES (?, ?)", (name, comment))
+            conn.commit()
+            conn.close()
+            return redirect('/home')
+    else:
+        conn = sqlite3.connect(DATABASE)
+        c = conn.cursor()
+        c.execute("SELECT * FROM comments")
+        comments = c.fetchall()
+        conn.close()
+        data = get_msg_db()
+        return render_template('index.html',data=data, comments=comments)
+    
 
 
 @app.route('/update_msg_db', methods=['POST'])
@@ -86,4 +116,5 @@ def update_news():
 
 
 if __name__ == "__main__":
+    create_table()
     app.run(port=8000)

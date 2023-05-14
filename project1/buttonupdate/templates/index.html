@@ -78,6 +78,17 @@
                         </tr>
                         {% endfor %}
                     </table>
+                    <form method="POST" action="/home">
+                        <input type="text" name="name" placeholder="이름"><br>
+                        <textarea name="comment" placeholder="댓글"></textarea><br>
+                        <input type="submit" value="등록">
+                    </form>
+                    <h2>이전 댓글</h2>
+                    <ul>
+                        {% for comment in comments %}
+                        <li>{{ comment[1] }}: {{ comment[2] }}</li>
+                        {% endfor %}
+                    </ul>
                 </div>
             </div>
         </div>

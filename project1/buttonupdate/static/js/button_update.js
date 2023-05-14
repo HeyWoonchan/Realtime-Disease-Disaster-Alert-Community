@@ -18,7 +18,7 @@ $(document).ready(function() {
             type: 'POST',
             dataType: 'json',
             success: function(data) {
-                $('#newsArea').text(data.content);
+                $('#newsArea').html(data.content);
             },
             error: function(error) {
                 console.log(error);
@@ -32,6 +32,19 @@ $(document).ready(function() {
             dataType: 'json',
             success: function(data) {
                 $('#apimsgArea').text(JSON.stringify(data));
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    });
+    $('#apimsgButton_db').on('click', function() {
+        $.ajax({
+            url: '/update_msg_db',
+            type: 'POST',
+            dataType: 'json',
+            success: function(data) {
+                $('#apimsgArea_db').text(data.data);
             },
             error: function(error) {
                 console.log(error);

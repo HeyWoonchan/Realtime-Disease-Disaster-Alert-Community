@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <meta name="description" content="" />
         <meta name="author" content="" />
-        <title>Simple Sidebar - Start Bootstrap Template</title>
+        <title>질병 및 재난 알리미</title>
         <!-- Favicon-->
         <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='static/assets/favicon.ico') }}" />
         <!-- Core theme CSS (includes Bootstrap)-->
@@ -51,23 +51,33 @@
                 </nav>
                 <!-- Page content-->
                 <div class="container-fluid">
-                    <h1 class="mt-4">Simple Sidebar</h1>
-                    <p>The starting state of the menu will appear collapsed on smaller screens, and will appear non-collapsed on larger screens. When toggled using the button below, the menu will change.</p>
-                    <p>
-                        Make sure to keep all page content within the
-                        <code>#page-content-wrapper</code>
-                        . The top navbar is optional, and just for demonstration. Just create an element with the
-                        <code>#sidebarToggle</code>
-                        ID which will toggle the menu when clicked.
-                    </p>
-                    <div id="contentArea">안전청 웹 크롤링(celenium)</div>
-                    <button id="updateButton">업데이트</button>
+                    <h1 class="mt-4">국내 정보</h1>
 
-                    <div id="newsArea">연합뉴스속보 업데이트</div>
+                    <p>연합뉴스속보</p>
+                    <div id="newsArea"></div>
                     <button id="newsButton">업데이트</button>
 
-                    <div id="apimsgArea">api 재난문자</div>
+                    <p>api 재난문자</p>
+                    <div id="apimsgArea"></div>
                     <button id="apimsgButton">업데이트</button>
+
+                    <p>api 재난문자 db 업데이트</p>
+                    <div id="apimsgArea_db"></div>
+                    <button id="apimsgButton_db">업데이트</button>
+                    <table>
+                        <tr>
+                            <th>time</th>
+                            <th>location</th>
+                            <th>msg</th>
+                        </tr>
+                        {% for row in data %}
+                        <tr>
+                            <td>{{ row[0] }}</td>
+                            <td>{{ row[1] }}</td>
+                            <td>{{ row[2] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
                 </div>
             </div>
         </div>

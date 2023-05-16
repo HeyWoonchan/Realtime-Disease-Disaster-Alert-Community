@@ -25,6 +25,19 @@ $(document).ready(function() {
             }
         });
     });
+    $('#newsnaverButton').on('click', function() {
+        $.ajax({
+            url: '/update_news_naver',
+            type: 'POST',
+            dataType: 'json',
+            success: function(data) {
+                $('#newsnaverArea').text(data.content);
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    });
     $('#apimsgButton').on('click', function() {
         $.ajax({
             url: '/api_disaster_update',

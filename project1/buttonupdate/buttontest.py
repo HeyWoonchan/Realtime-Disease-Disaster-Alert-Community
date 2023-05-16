@@ -17,9 +17,23 @@ def get_msg_db():
     conn.close()
     return data
 
-DATABASE = 'comments.db'
+
+
+DB_comment = 'comments.db'
+DB_news = 'news.db'
 def create_table():
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(DB_comment)
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS comments (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT NOT NULL,
+                    content TEXT NOT NULL
+                )''')
+    conn.commit()
+    conn.close()
+
+def create_table():
+    conn = sqlite3.connect(DB_comment)
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS comments (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -33,11 +47,11 @@ def create_table():
 
 url_news = "https://www.yna.co.kr/theme/breaknews-history"
 url_api = "http://apis.data.go.kr/1741000/DisasterMsg3/getDisasterMsg1List?serviceKey=DCEWLmC5o0ec6lJ%2FsTpRPUFLDnn8eH24STfRT5ZxbqR9BQBOk0i484ELM%2BBMVgC3YDKc8SiGrtkcs17Skrp97A%3D%3D&pageNo=1&numOfRows=3&type=json"
-
+url_navernews = 'https://search.naver.com/search.naver?where=news&query=%EB%89%B4%EC%8A%A4%20%EC%86%8D%EB%B3%B4&sort=1&sm=tab_smr&nso=so:dd,p:all,a:all'
 app = Flask(__name__)
 @app.route('/')
 def index():
-    return render_template('main.html')
+    return redirect('/home')
 
 
 @app.route('/comment')
@@ -49,14 +63,14 @@ def home():
         name = request.form['name']
         comment = request.form['comment']
         if name and comment:
-            conn = sqlite3.connect(DATABASE)
+            conn = sqlite3.connect(DB_comment)
             c = conn.cursor()
             c.execute("INSERT INTO comments (name, content) VALUES (?, ?)", (name, comment))
             conn.commit()
             conn.close()
             return redirect('/home')
     else:
-        conn = sqlite3.connect(DATABASE)
+        conn = sqlite3.connect(DB_comment)
         c = conn.cursor()
         c.execute("SELECT * FROM comments")
         comments = c.fetchall()
@@ -113,6 +127,16 @@ def update_news():
     new_content = str(soup.find_all('a', class_='tit-wrap')[0])
     print(new_content)
     return jsonify({"content": new_content})
+
+@app.route('/update_news_naver', methods=['POST'])
+def update_news_naver():
+    response = requests.get(url_navernews)
+    soup = BeautifulSoup(response.content, 'html.parser')
+    news_articles = str(soup.find_all('a', class_='news_tit')[0].text)
+
+    print(news_articles)
+    return jsonify({"content": news_articles})
+
 
 
 if __name__ == "__main__":

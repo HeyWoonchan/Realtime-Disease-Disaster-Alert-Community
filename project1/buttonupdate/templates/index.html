@@ -52,18 +52,23 @@
                 <!-- Page content-->
                 <div class="container-fluid">
                     <h1 class="mt-4">국내 정보</h1>
-
+                    <br>
                     <p>연합뉴스속보</p>
                     <div id="newsArea"></div>
-                    <button id="newsButton">업데이트</button>
-
+                    <button id="newsButton">불러오기</button>
+                    <hr>
+                    <p>네이버뉴스 속보 검색결과</p>
+                    <div id="newsnaverArea"></div>
+                    <button id="newsnaverButton">불러오기</button>
+                    <hr>
                     <p>api 재난문자</p>
                     <div id="apimsgArea"></div>
                     <button id="apimsgButton">업데이트</button>
-
+                    <hr>
                     <p>api 재난문자 db 업데이트</p>
                     <div id="apimsgArea_db"></div>
                     <button id="apimsgButton_db">업데이트</button>
+                    <hr>
                     <table>
                         <tr>
                             <th>time</th>
@@ -78,11 +83,13 @@
                         </tr>
                         {% endfor %}
                     </table>
+                    <br><br><br>
                     <form method="POST" action="/home">
                         <input type="text" name="name" placeholder="이름"><br>
                         <textarea name="comment" placeholder="댓글"></textarea><br>
                         <input type="submit" value="등록">
                     </form>
+                    <br>
                     <h2>이전 댓글</h2>
                     <ul>
                         {% for comment in comments %}

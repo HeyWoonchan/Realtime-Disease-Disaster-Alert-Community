@@ -3,11 +3,17 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import requests
 import json
+import os.path
 from bs4 import BeautifulSoup
 import sqlite3
 
+
+DATABASE = 'comments.db'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+msgdb_path = os.path.join(BASE_DIR, 'database.db')
+
 def get_msg_db():
-    conn = sqlite3.connect('project1/buttonupdate/static/database.db')
+    conn = sqlite3.connect(msgdb_path)
     cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM my_table ORDER BY create_date DESC LIMIT 3")
@@ -17,7 +23,7 @@ def get_msg_db():
     conn.close()
     return data
 
-DATABASE = 'comments.db'
+
 def create_table():
     conn = sqlite3.connect(DATABASE)
     c = conn.cursor()
@@ -28,7 +34,6 @@ def create_table():
                 )''')
     conn.commit()
     conn.close()
-
 
 
 url_news = "https://www.yna.co.kr/theme/breaknews-history"
@@ -71,7 +76,7 @@ def update_msg_db():
     response = requests.get(url_api)
     jdata = response.json()
     json_data = json.loads(json.dumps(jdata))
-    conn = sqlite3.connect('project1/buttonupdate/static/database.db')
+    conn = sqlite3.connect(msgdb_path)
     cursor = conn.cursor()
     cursor.execute('''CREATE TABLE IF NOT EXISTS my_table (
                         create_date TEXT,
@@ -98,10 +103,9 @@ def update_msg_db():
     conn.close()
     return jsonify({'data': '업데이트 완료'})
 
+
 @app.route('/api_disaster_update', methods=['POST'])
 def get_disaster_messages():
-    
-    
     response = requests.get(url_api)
 
     return response.json()
@@ -114,7 +118,37 @@ def update_news():
     print(new_content)
     return jsonify({"content": new_content})
 
+@app.route('/update_marker')
+def update_marker():
+    con = sqlite3.connect(msgdb_path, isolation_level=None)
+    cursor = con.cursor()
+    cursor.execute('select * from my_table order by create_date desc limit 1')
+    gotdata = cursor.fetchone()
+    address = gotdata[1]
+    what = gotdata[2]
+
+    client_id = 'oa0k1d1gao'  # 발급받은 클라이언트 아이디
+    client_secret = 'HVhJUs3dvAA26uPDd7CIL9fhoV3MxP2YwWlnB7FJ'
+    url = f'https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode?query={address}'
+    headers = {'X-NCP-APIGW-API-KEY-ID': client_id, 'X-NCP-APIGW-API-KEY': client_secret}
+
+    response = requests.get(url, headers=headers)
+    data = response.json()
+
+    print(address)
+
+    if 'addresses' in data:
+            if len(data['addresses']) > 0:
+                latitude = data['addresses'][0]['y']  # 위도
+                longitude = data['addresses'][0]['x']  # 경도
+                print(latitude, longitude, what)
+                return jsonify({'latitude' : latitude, 'longitude': longitude, 'what': what})
+            else:
+                    print("주소를 찾을 수 없습니다.")
+    else:
+            print("API 요청에 실패했습니다.")
+
 
 if __name__ == "__main__":
     create_table()
-    app.run(host='localhost', port=8023)
+    app.run(host='localhost', port=8032)

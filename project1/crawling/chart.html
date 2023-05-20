@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Stacked Bar Chart with Groups</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset = "utf-8">
+</head>
+<body>
+  <canvas id="myChart"></canvas>
+
+  <script>
+    // 데이터베이스 예시 데이터
+    var data = [
+      { day: '월요일', monkey: 2, corona: 30 },
+      { day: '화요일', monkey: 5, corona: 40 },
+      { day: '수요일', monkey: 3, corona: 10 },
+      { day: '목요일', monkey: 1, corona: 100 },
+      { day: '금요일', monkey: 6, corona: 50 },
+      { day: '토요일', monkey: 15, corona: 60 },
+      { day: '일요일', monkey: 4, corona: 11 }
+    ];
+
+    // 그래프 생성
+    var ctx = document.getElementById('myChart').getContext('2d');
+    var myChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: data.map(item => item.day), // x축 라벨로 요일 사용
+        datasets: [
+          {
+            label: '원숭이두창',
+            data: data.map(item => item.monkey), // 원숭이두창 데이터
+            backgroundColor: 'rgba(54, 162, 235, 0.5)' // 아랫 부분 색상
+          },
+          {
+            label: '코로나',
+            data: data.map(item => item.corona), // 코로나 확진자 데이터
+            backgroundColor: 'rgba(255, 99, 132, 0.5)' // 윗 부분 색상
+          }
+        ]
+      },
+      options: {
+        scales: {
+          x: { stacked: true }, // x축에 그룹화된 막대 표시
+          y: { stacked: true } // y축에 스택된 막대 표시
+        }
+      }
+    });
+  </script>
+</body>
+</html>

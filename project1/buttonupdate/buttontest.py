@@ -6,8 +6,12 @@ import json
 from bs4 import BeautifulSoup
 import sqlite3
 
+DB_msg = 'database.db'
+DB_comment = 'comments.db'
+DB_news = 'news.db'
+
 def get_msg_db():
-    conn = sqlite3.connect('project1/buttonupdate/static/database.db')
+    conn = sqlite3.connect(DB_msg)
     cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM my_table ORDER BY create_date DESC LIMIT 3")
@@ -17,10 +21,6 @@ def get_msg_db():
     conn.close()
     return data
 
-
-
-DB_comment = 'comments.db'
-DB_news = 'news.db'
 def create_table():
     conn = sqlite3.connect(DB_comment)
     c = conn.cursor()
@@ -31,23 +31,12 @@ def create_table():
                 )''')
     conn.commit()
     conn.close()
-
-def create_table():
-    conn = sqlite3.connect(DB_comment)
-    c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS comments (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL,
-                    content TEXT NOT NULL
-                )''')
-    conn.commit()
-    conn.close()
-
 
 
 url_news = "https://www.yna.co.kr/theme/breaknews-history"
 url_api = "http://apis.data.go.kr/1741000/DisasterMsg3/getDisasterMsg1List?serviceKey=DCEWLmC5o0ec6lJ%2FsTpRPUFLDnn8eH24STfRT5ZxbqR9BQBOk0i484ELM%2BBMVgC3YDKc8SiGrtkcs17Skrp97A%3D%3D&pageNo=1&numOfRows=3&type=json"
 url_navernews = 'https://search.naver.com/search.naver?where=news&query=%EB%89%B4%EC%8A%A4%20%EC%86%8D%EB%B3%B4&sort=1&sm=tab_smr&nso=so:dd,p:all,a:all'
+
 app = Flask(__name__)
 @app.route('/')
 def index():
@@ -85,7 +74,7 @@ def update_msg_db():
     response = requests.get(url_api)
     jdata = response.json()
     json_data = json.loads(json.dumps(jdata))
-    conn = sqlite3.connect('project1/buttonupdate/static/database.db')
+    conn = sqlite3.connect(DB_msg)
     cursor = conn.cursor()
     cursor.execute('''CREATE TABLE IF NOT EXISTS my_table (
                         create_date TEXT,
@@ -137,8 +126,37 @@ def update_news_naver():
     print(news_articles)
     return jsonify({"content": news_articles})
 
+@app.route('/update_marker')
+def update_marker():
+    con = sqlite3.connect(DB_msg, isolation_level=None)
+    cursor = con.cursor()
+    cursor.execute('select * from my_table order by create_date desc limit 1')
+    gotdata = cursor.fetchone()
+    address = gotdata[1]
+    what = gotdata[2]
+
+    client_id = 'oa0k1d1gao'  # 발급받은 클라이언트 아이디
+    client_secret = 'HVhJUs3dvAA26uPDd7CIL9fhoV3MxP2YwWlnB7FJ'
+    url_map = f'https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode?query={address}'
+    headers = {'X-NCP-APIGW-API-KEY-ID': client_id, 'X-NCP-APIGW-API-KEY': client_secret}
+
+    response = requests.get(url_map, headers=headers)
+    data = response.json()
+
+    print(address)
+
+    if 'addresses' in data:
+            if len(data['addresses']) > 0:
+                latitude = data['addresses'][0]['y']  # 위도
+                longitude = data['addresses'][0]['x']  # 경도
+                print(latitude, longitude, what)
+                return jsonify({'latitude' : latitude, 'longitude': longitude, 'what': what})
+            else:
+                    print("주소를 찾을 수 없습니다.")
+    else:
+            print("API 요청에 실패했습니다.")
 
 
 if __name__ == "__main__":
     create_table()
-    app.run(port=8000)
+    app.run(host='localhost', port=8023)

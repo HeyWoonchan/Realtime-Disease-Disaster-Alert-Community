@@ -9,7 +9,36 @@ DB_msg = 'database.db'
 DB_comment = 'comments.db'
 DB_news = 'news.db'
 
-# 메시지 데이터베이스에서 데이터 가져오는 함수
+
+#재난문자 type으로 차트를 생성
+def get_chart_data():
+    # SQLite 데이터베이스 연결
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+
+    # 최근 5일의 데이터 조회
+    cursor.execute("SELECT DISTINCT create_date FROM my_table ORDER BY create_date DESC LIMIT 50")
+    dates = cursor.fetchall()
+    dates = [date[0].split()[0] for date in dates]
+
+    # 각 날짜별 type의 개수 조회
+    chart_data = {}
+    for date in dates:
+        chart_data[date] = {'undefined': 0, 'missing': 0, 'disaster': 0}
+
+    for date in chart_data.keys():
+        cursor.execute(f"SELECT type, COUNT(*) FROM my_table WHERE create_date LIKE '{date}%' GROUP BY type")
+        rows = cursor.fetchall()
+        for row in rows:
+            chart_data[date][row[0]] = row[1]
+
+    # 데이터베이스 연결 종료
+    cursor.close()
+    conn.close()
+
+    return chart_data
+
+# 재난문자 데이터베이스에서 데이터 가져오는 함수
 def get_msg_db():
     conn = sqlite3.connect(DB_msg)
     cursor = conn.cursor()
@@ -33,9 +62,22 @@ def create_table():
     conn.commit()
     conn.close()
 
+    conn = sqlite3.connect(DB_msg)
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS my_table (
+                    create_date TEXT,
+                    location_name TEXT,
+                    msg TEXT,
+                    type TEXT
+                )''')
+    conn.commit()
+    conn.close()
+
+
+
 
 url_news = "https://www.yna.co.kr/theme/breaknews-history"
-url_api = "http://apis.data.go.kr/1741000/DisasterMsg3/getDisasterMsg1List?serviceKey=DCEWLmC5o0ec6lJ%2FsTpRPUFLDnn8eH24STfRT5ZxbqR9BQBOk0i484ELM%2BBMVgC3YDKc8SiGrtkcs17Skrp97A%3D%3D&pageNo=1&numOfRows=3&type=json"
+url_api = "http://apis.data.go.kr/1741000/DisasterMsg3/getDisasterMsg1List?serviceKey=DCEWLmC5o0ec6lJ%2FsTpRPUFLDnn8eH24STfRT5ZxbqR9BQBOk0i484ELM%2BBMVgC3YDKc8SiGrtkcs17Skrp97A%3D%3D&pageNo=1&numOfRows=10&type=json"
 url_navernews = 'https://search.naver.com/search.naver?where=news&query=%EB%89%B4%EC%8A%A4%20%EC%86%8D%EB%B3%B4&sort=1&sm=tab_smr&nso=so:dd,p:all,a:all'
 
 app = Flask(__name__)
@@ -72,7 +114,7 @@ def comment():
 @app.route('/home', methods=['GET', 'POST'])
 def home():
     if request.method == 'POST':
-        # 폼 제출 처리를 위한 로직
+        # 댓글 폼 제출 처리를 위한 로직
         name = request.form['name']
         comment = request.form['comment']
         if name and comment:
@@ -84,13 +126,16 @@ def home():
             return redirect('/home')
     else:
         # 데이터 가져와서 홈 페이지 렌더링
+
+        chart_data = get_chart_data()
         conn = sqlite3.connect(DB_comment)
         c = conn.cursor()
         c.execute("SELECT * FROM comments")
         comments = c.fetchall()
         conn.close()
         data = get_msg_db()
-        return render_template('index.html', data=data, comments=comments)
+        dates = list(chart_data.keys())[::-1] 
+        return render_template('index.html', data=data, comments=comments, chart_data=chart_data,dates=dates)
 
 # 메시지 데이터베이스 업데이트 API 경로
 @app.route('/update_msg_db', methods=['POST'])
@@ -100,29 +145,46 @@ def update_msg_db():
     json_data = json.loads(json.dumps(jdata))
     conn = sqlite3.connect(DB_msg)
     cursor = conn.cursor()
+
     cursor.execute('''CREATE TABLE IF NOT EXISTS my_table (
                         create_date TEXT,
                         location_name TEXT,
-                        msg TEXT
+                        msg TEXT,
+                        type TEXT
                     )''')
+
+    # 단어 목록과 해당 타입 지정
+    disaster_words = ['지진', '산불', '화재']
+    missing_words = ['실종', '찾습니다']
+
     for item in json_data['DisasterMsg'][1]['row']:
         create_date = item['create_date']
         location_name = item['location_name']
         msg = item['msg']
+
+        # msg에 있는 단어를 확인하여 type 설정
+        if any(word in msg for word in disaster_words):
+            msg_type = 'disaster'
+        elif any(word in msg for word in missing_words):
+            msg_type = 'missing'
+        else:
+            msg_type = 'undefined'
+
         cursor.execute("SELECT * FROM my_table WHERE create_date = ? AND location_name = ? AND msg = ?",
-                       (create_date, location_name, msg))
+                    (create_date, location_name, msg))
         existing_data = cursor.fetchone()
 
         if existing_data:
             print("Data already exists in the database.")
         else:
-            cursor.execute("INSERT INTO my_table (create_date, location_name, msg) VALUES (?, ?, ?)",
-                           (create_date, location_name, msg))
+            cursor.execute("INSERT INTO my_table (create_date, location_name, msg, type) VALUES (?, ?, ?, ?)",
+                        (create_date, location_name, msg, msg_type))
             conn.commit()
             print("Data added to the database.")
-        
+
     conn.commit()
     conn.close()
+
     return jsonify({'data': '업데이트 완료'})
 
 # 재난 메시지 업데이트를 위한 API 경로

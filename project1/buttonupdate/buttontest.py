@@ -6,11 +6,13 @@ import json
 import os.path
 from bs4 import BeautifulSoup
 import sqlite3
+import googlemaps
 
 
 DATABASE = 'comments.db'
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 msgdb_path = os.path.join(BASE_DIR, 'database.db')
+exdb_path = os.path.join(BASE_DIR, 'ForSafeTrip.db')
 
 def get_msg_db():
     conn = sqlite3.connect(msgdb_path)
@@ -44,6 +46,9 @@ app = Flask(__name__)
 def index():
     return render_template('main.html')
 
+@app.route('/external')
+def ex():
+    return render_template('external.html')
 
 @app.route('/comment')
 
@@ -118,37 +123,45 @@ def update_news():
     print(new_content)
     return jsonify({"content": new_content})
 
-@app.route('/update_marker')
-def update_marker():
+@app.route('/update_marker_internal')
+def update_marker1():
     con = sqlite3.connect(msgdb_path, isolation_level=None)
     cursor = con.cursor()
     cursor.execute('select * from my_table order by create_date desc limit 1')
     gotdata = cursor.fetchone()
-    address = gotdata[1]
+    where = gotdata[1]
     what = gotdata[2]
 
-    client_id = 'oa0k1d1gao'  # 발급받은 클라이언트 아이디
-    client_secret = 'HVhJUs3dvAA26uPDd7CIL9fhoV3MxP2YwWlnB7FJ'
-    url = f'https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode?query={address}'
-    headers = {'X-NCP-APIGW-API-KEY-ID': client_id, 'X-NCP-APIGW-API-KEY': client_secret}
+    api_key = 'AIzaSyCnp17nNrPOjhrQk4Pp7HUVfMGzyqGw5eI'
+    maps = googlemaps.Client(key=api_key)
 
-    response = requests.get(url, headers=headers)
-    data = response.json()
+    results = maps.geocode(where)
 
-    print(address)
+    for result in results:
+        address = result['geometry']['location']
+        print(address['lat'], address['lng'], what)
+        return jsonify({'latitude' : address['lat'], 'longitude': address['lng'], 'what' : what})
+    
+@app.route('/update_marker_external')
+def update_marker2():
+    con = sqlite3.connect(exdb_path, isolation_level=None)
+    cursor = con.cursor()
+    cursor.execute('select * from ForSafeTrip order by id asc limit 1')
+    gotdata = cursor.fetchone()
+    where = gotdata[1]
+    what = gotdata[2]
 
-    if 'addresses' in data:
-            if len(data['addresses']) > 0:
-                latitude = data['addresses'][0]['y']  # 위도
-                longitude = data['addresses'][0]['x']  # 경도
-                print(latitude, longitude, what)
-                return jsonify({'latitude' : latitude, 'longitude': longitude, 'what': what})
-            else:
-                    print("주소를 찾을 수 없습니다.")
-    else:
-            print("API 요청에 실패했습니다.")
+    api_key = 'AIzaSyCnp17nNrPOjhrQk4Pp7HUVfMGzyqGw5eI'
+    maps = googlemaps.Client(key=api_key)
+
+    results = maps.geocode(where)
+
+    for result in results:
+        address = result['geometry']['location']
+        print(address['lat'], address['lng'], what)
+        return jsonify({'latitude' : address['lat'], 'longitude': address['lng'], 'what' : what})
 
 
 if __name__ == "__main__":
     create_table()
-    app.run(host='localhost', port=8032)
+    app.run(host='localhost', port=8042)

@@ -56,46 +56,10 @@
                 </nav>
                 <!-- Page content-->
                 <div class="container-fluid">
-                    <h1 class="mt-4">국내 정보</h1> </div>
+                    <h1 class="mt-4">국외 정보</h1> </div>
                     <div class="row">
                         <div class="col-md-3">
                           <div id="map" style="width: 100%;height:400px;"></div>
-                        </div>
-                        <div class="col-md-3">
-                          <p>연합뉴스속보</p>
-                          <div id="newsArea"></div>
-                          <button id="newsButton">업데이트</button>
-                          <p>api 재난문자</p>
-                          <div id="apimsgArea"></div>
-                          <button id="apimsgButton">업데이트</button>
-                          <p>api 재난문자 db 업데이트</p>
-                          <div id="apimsgArea_db"></div>
-                          <button id="apimsgButton_db">업데이트</button>
-                          <table>
-                            <tr>
-                              <th>time</th>
-                              <th>location</th>
-                              <th>msg</th>
-                            </tr>
-                            {% for row in data %}
-                            <tr>
-                              <td>{{ row[0] }}</td>
-                              <td>{{ row[1] }}</td>
-                              <td>{{ row[2] }}</td>
-                            </tr>
-                            {% endfor %}
-                          </table>
-                          <form method="POST" action="/home">
-                            <input type="text" name="name" placeholder="이름"><br>
-                            <textarea name="comment" placeholder="댓글"></textarea><br>
-                            <input type="submit" value="등록">
-                          </form>
-                          <h2>이전 댓글</h2>
-                          <ul>
-                            {% for comment in comments %}
-                            <li>{{ comment[1] }}: {{ comment[2] }}</li>
-                            {% endfor %}
-                          </ul>
                         </div>
                     </div>
         </div>
@@ -108,7 +72,7 @@
 
         <script src="{{ url_for('static', filename='js/button_update.js') }}"></script>
         
-        <script src="{{ url_for('static', filename='js/maps_in.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/maps_ex.js') }}"></script>
 
         
 

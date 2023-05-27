@@ -16,7 +16,7 @@ def get_chart_data():
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
 
-    # 최근 5일의 데이터 조회
+    # 최근 데이터 조회
     cursor.execute("SELECT DISTINCT create_date FROM my_table ORDER BY create_date DESC LIMIT 50")
     dates = cursor.fetchall()
     dates = [date[0].split()[0] for date in dates]

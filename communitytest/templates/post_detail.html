@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ post.title }}</title>
+</head>
+<body>
+    <h1>{{ post.title }} by {{ post.author }}</h1>
+    <p>{{ post.content }}</p>
+    <small>{{ post.timestamp.strftime('%Y-%m-%d %H:%M') }}</small>
+    
+    <h2>Comments</h2>
+    <ul>
+    {% for comment in post.comments %}
+        <li>{{ comment.author }}: {{ comment.content }}</li>
+    {% endfor %}
+    </ul>
+
+
+    {% for comment in comments %}
+    <div class="comment">
+        <div class="content">
+            {{ comment.content }}
+        </div>
+        <div class="author">
+            {{ comment.author }}
+        </div>
+        <div class="timestamp">
+            {{ comment.timestamp.strftime('%Y-%m-%d %H:%M') }}
+        </div>
+    </div>
+    <br>
+    {% endfor %}
+
+
+    <form action="{{ url_for('comment_post', post_id=post.id) }}" method="post">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.author.label }}<br>
+            {{ form.author(size=32) }}
+        </p>
+        <p>
+            {{ form.content.label }}<br>
+            {{ form.content(size=32) }}
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+
+    <a href="{{ url_for('index') }}">Back to list</a>
+</body>
+</html>

@@ -10,6 +10,7 @@ DB_comment = 'comments.db'
 DB_news = 'news.db'
 DB_internal_msg = 'database.db'
 DB_external_msg = 'ForSafeTrip.db'
+DB_WHOnews = 'ExternalNews.db'
 
 
 #재난문자 type으로 차트를 생성
@@ -221,7 +222,7 @@ def update_news_naver():
 
 # 국내 마커 업데이트를 위한 API 경로
 @app.route('/update_marker_internal')
-def update_marker1():
+def update_marker_in():
     con = sqlite3.connect(DB_internal_msg, isolation_level=None)
     cursor = con.cursor()
     cursor.execute('select * from my_table order by create_date desc limit 1')
@@ -240,15 +241,16 @@ def update_marker1():
         return jsonify({'latitude' : address['lat'], 'longitude': address['lng'], 'what' : what})
 
 
-# 해외 마커 업데이트를 위한 API 경로
-@app.route('/update_marker_external')
-def update_marker2():
+# 해외 안전 정보 업데이트를 위한 API 경로
+@app.route('/update_external')
+def update_marker_ex():
     con = sqlite3.connect(DB_external_msg, isolation_level=None)
     cursor = con.cursor()
     cursor.execute('select * from ForSafeTrip order by id asc limit 1')
     gotdata = cursor.fetchone()
     where = gotdata[1]
     what = gotdata[2]
+    link = gotdata[3]
 
     api_key = 'AIzaSyCnp17nNrPOjhrQk4Pp7HUVfMGzyqGw5eI'
     maps = googlemaps.Client(key=api_key)
@@ -258,10 +260,20 @@ def update_marker2():
     for result in results:
         address = result['geometry']['location']
         print(address['lat'], address['lng'], what)
-        return jsonify({'latitude' : address['lat'], 'longitude': address['lng'], 'what' : what})
+        return jsonify({'latitude' : address['lat'], 'longitude': address['lng'], 'what' : what, "link":link})
+    
+@app.route('/update_WHOnews')
+def update_WHOnews():
+    con = sqlite3.connect(DB_WHOnews, isolation_level=None)
+    cursor = con.cursor()
+    cursor.execute('select link from ExternalNews order by id asc limit 1')
+    link = cursor.fetchone()
+
+    print(link)
+    return jsonify({'link' : link})
 
 
 # 애플리케이션 실행
 if __name__ == "__main__":
     create_table()
-    app.run(host='localhost', port=8023)
+    app.run(host='localhost', port=8015)

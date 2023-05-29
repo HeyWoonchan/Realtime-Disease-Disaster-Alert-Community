@@ -3,6 +3,7 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="description" content="" />
         <meta name="author" content="" />
         <title>질병 및 재난 알리미</title>
@@ -11,10 +12,9 @@
         <!-- Core theme CSS (includes Bootstrap)-->
         <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet" />
         <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=oa0k1d1gao"></script>
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script async
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnp17nNrPOjhrQk4Pp7HUVfMGzyqGw5eI&callback=initMap"> </script>
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnp17nNrPOjhrQk4Pp7HUVfMGzyqGw5eI&callback=initMap"> </script>
+        
 
     </head>
     <body>
@@ -56,57 +56,26 @@
                 </nav>
                 <!-- Page content-->
                 <div class="container-fluid">
-                    <h1 class="mt-4">국내 정보</h1>
-                    <div id="map" style="width:600;height:400px;"></div>
-                    <br>
-                    <p>연합뉴스속보</p>
-                    <div id="newsArea"></div>
-                    <button id="newsButton">불러오기</button>
-                    <hr>
-                    <p>네이버뉴스 속보 검색결과</p>
-                    <div id="newsnaverArea"></div>
-                    <button id="newsnaverButton">불러오기</button>
-                    <hr>
-                    <p>api 재난문자</p>
-                    <div id="apimsgArea"></div>
-                    <button id="apimsgButton">업데이트</button>
-                    <hr>
-                    <p>api 재난문자 db 업데이트</p>
-                    <div id="apimsgArea_db"></div>
-                    <button id="apimsgButton_db">업데이트</button>
-                    <hr>
-                    <table>
-                        <tr>
-                            <th>time</th>
-                            <th>location</th>
-                            <th>msg</th>
-                            <th>type</th>
-                        </tr>
-                        {% for row in data %}
-                        <tr>
-                            <td>{{ row[0] }}</td>
-                            <td>{{ row[1] }}</td>
-                            <td>{{ row[2] }}</td>
-                            <td>{{ row[3] }}</td>
-                        </tr>
-                        {% endfor %}
-                    </table>
-                    <br><br><br>
-                    <form method="POST" action="/home">
-                        <input type="text" name="name" placeholder="이름"><br>
-                        <textarea name="comment" placeholder="댓글"></textarea><br>
-                        <input type="submit" value="등록">
-                    </form>
-                    <br>
-                    <h2>이전 댓글</h2>
-                    <ul>
-                        {% for comment in comments %}
-                        <li>{{ comment[1] }}: {{ comment[2] }}</li>
-                        {% endfor %}
-                    </ul>
-                    <canvas id="myChart" width="400" height="200"></canvas>
-                </div>
-            </div>
+                    <h1 class="mt-4">국외 정보</h1> </div>
+                    <div id="map" style="width: 1000px;height: 800px;"></div>
+                    
+                    <div>
+                        <input type="button" onclick="toggleIframe_notice()" value="안전 공지 보기" style="width:130px; height:50px; padding-top: 2px"></button>
+                        <input type="button" onclick="toggleIframe_WHO()" value="WHO 최근 기사 보기" style="width:200px; height:50px; padding-top: 2px"></button>
+                        <hr>
+                        <div id="iframeContainer_notice" style="display: none; padding-top: 2px">
+                            <p>안전 공지<p>
+                            <div style="position: absolute; top: -360px; left: 0px;"></div>
+                            <iframe name="Ifrm_notice" id="Ifrm_notice" src="" height="860px" width="880px"></iframe>
+                        </div>
+                        <div id="iframeContainer_WHO" style="display: none; padding-top: 2px">
+                            <p>WHO 최근 기사<p>
+                            <div style="position: absolute; top: -360px; left: 0px;"></div>
+                            <iframe name="Ifrm_WHOnews" id="Ifrm_WHOnews" src="" height="860px" width="880px"></iframe>
+                        </div>
+                    </div>
+                        
+                    </div>
         </div>
         
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -116,58 +85,10 @@
         <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 
         <script src="{{ url_for('static', filename='js/button_update.js') }}"></script>
+        
+        <script src="{{ url_for('static', filename='js/maps_ex.js') }}"></script>
 
-        <script src="{{ url_for('static', filename='js/maps_in.js') }}"></script>
+        
 
-
-        <script>
-            var chartData = {{ chart_data|tojson }}; // 오류 아님
-            var dates = {{ dates|tojson }};
-
-            var types = Object.keys(chartData[dates[0]]);
-
-            var datasets = [];
-            types.forEach(function(type) {
-                var data = [];
-                dates.forEach(function(date) {
-                    data.push(chartData[date][type]);
-                });
-
-                var dataset = {
-                    label: type,
-                    data: data,
-                    backgroundColor: getRandomColor()
-                };
-                datasets.push(dataset);
-            });
-
-            var ctx = document.getElementById('myChart').getContext('2d');
-            var myChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: dates,
-                    datasets: datasets
-                },
-                options: {
-                    scales: {
-                        x: {
-                            stacked: true
-                        },
-                        y: {
-                            stacked: true
-                        }
-                    }
-                }
-            });
-
-            function getRandomColor() {
-                var letters = '0123456789ABCDEF';
-                var color = '#';
-                for (var i = 0; i < 6; i++) {
-                    color += letters[Math.floor(Math.random() * 16)];
-                }
-                return color;
-            }    
-        </script>
     </body>
 </html>

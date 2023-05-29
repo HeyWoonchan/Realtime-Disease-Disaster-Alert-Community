@@ -3,17 +3,19 @@ import requests
 import json
 from bs4 import BeautifulSoup
 import sqlite3
+import googlemaps
 
 # 데이터베이스 파일 이름
-DB_msg = 'database.db'
 DB_comment = 'comments.db'
 DB_news = 'news.db'
+DB_internal_msg = 'database.db'
+DB_external_msg = 'ForSafeTrip.db'
 
 
 #재난문자 type으로 차트를 생성
 def get_chart_data():
     # SQLite 데이터베이스 연결
-    conn = sqlite3.connect('database.db')
+    conn = sqlite3.connect(DB_internal_msg)
     cursor = conn.cursor()
 
     # 최근 5일의 데이터 조회
@@ -40,7 +42,7 @@ def get_chart_data():
 
 # 재난문자 데이터베이스에서 데이터 가져오는 함수
 def get_msg_db():
-    conn = sqlite3.connect(DB_msg)
+    conn = sqlite3.connect(DB_internal_msg)
     cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM my_table ORDER BY create_date DESC LIMIT 3")
@@ -62,7 +64,7 @@ def create_table():
     conn.commit()
     conn.close()
 
-    conn = sqlite3.connect(DB_msg)
+    conn = sqlite3.connect(DB_internal_msg)
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS my_table (
                     create_date TEXT,
@@ -136,6 +138,11 @@ def home():
         data = get_msg_db()
         dates = list(chart_data.keys())[::-1] 
         return render_template('index.html', data=data, comments=comments, chart_data=chart_data,dates=dates)
+    
+#해외 페이지 
+@app.route('/external')
+def external():
+    return render_template('external.html')
 
 # 메시지 데이터베이스 업데이트 API 경로
 @app.route('/update_msg_db', methods=['POST'])
@@ -143,7 +150,7 @@ def update_msg_db():
     response = requests.get(url_api)
     jdata = response.json()
     json_data = json.loads(json.dumps(jdata))
-    conn = sqlite3.connect(DB_msg)
+    conn = sqlite3.connect(DB_internal_msg)
     cursor = conn.cursor()
 
     cursor.execute('''CREATE TABLE IF NOT EXISTS my_table (
@@ -212,36 +219,47 @@ def update_news_naver():
     print(news_articles)
     return jsonify({"content": news_articles})
 
-# 마커 업데이트를 위한 API 경로
-@app.route('/update_marker')
-def update_marker():
-    con = sqlite3.connect(DB_msg, isolation_level=None)
+# 국내 마커 업데이트를 위한 API 경로
+@app.route('/update_marker_internal')
+def update_marker1():
+    con = sqlite3.connect(DB_internal_msg, isolation_level=None)
     cursor = con.cursor()
     cursor.execute('select * from my_table order by create_date desc limit 1')
     gotdata = cursor.fetchone()
-    address = gotdata[1].split(',')[0]
+    where = gotdata[1]
     what = gotdata[2]
 
-    client_id = 'oa0k1d1gao'  # 발급받은 클라이언트 아이디
-    client_secret = 'HVhJUs3dvAA26uPDd7CIL9fhoV3MxP2YwWlnB7FJ'
-    url_map = f'https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode?query={address}'
-    headers = {'X-NCP-APIGW-API-KEY-ID': client_id, 'X-NCP-APIGW-API-KEY': client_secret}
+    api_key = 'AIzaSyCnp17nNrPOjhrQk4Pp7HUVfMGzyqGw5eI'
+    maps = googlemaps.Client(key=api_key)
 
-    response = requests.get(url_map, headers=headers)
-    data = response.json()
+    results = maps.geocode(where)
 
-    print(address)
+    for result in results:
+        address = result['geometry']['location']
+        print(address['lat'], address['lng'], what)
+        return jsonify({'latitude' : address['lat'], 'longitude': address['lng'], 'what' : what})
 
-    if 'addresses' in data:
-        if len(data['addresses']) > 0:
-            latitude = data['addresses'][0]['y']  # 위도
-            longitude = data['addresses'][0]['x']  # 경도
-            print(latitude, longitude, what)
-            return jsonify({'latitude': latitude, 'longitude': longitude, 'what': what})
-        else:
-            print("주소를 찾을 수 없습니다.")
-    else:
-        print("API 요청에 실패했습니다.")
+
+# 해외 마커 업데이트를 위한 API 경로
+@app.route('/update_marker_external')
+def update_marker2():
+    con = sqlite3.connect(DB_external_msg, isolation_level=None)
+    cursor = con.cursor()
+    cursor.execute('select * from ForSafeTrip order by id asc limit 1')
+    gotdata = cursor.fetchone()
+    where = gotdata[1]
+    what = gotdata[2]
+
+    api_key = 'AIzaSyCnp17nNrPOjhrQk4Pp7HUVfMGzyqGw5eI'
+    maps = googlemaps.Client(key=api_key)
+
+    results = maps.geocode(where)
+
+    for result in results:
+        address = result['geometry']['location']
+        print(address['lat'], address['lng'], what)
+        return jsonify({'latitude' : address['lat'], 'longitude': address['lng'], 'what' : what})
+
 
 # 애플리케이션 실행
 if __name__ == "__main__":

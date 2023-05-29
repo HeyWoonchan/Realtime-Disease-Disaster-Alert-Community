@@ -73,7 +73,6 @@ def home():
         conn.close()
         data = get_msg_db()
         return render_template('index.html',data=data, comments=comments)
-    
 
 
 @app.route('/update_msg_db', methods=['POST'])

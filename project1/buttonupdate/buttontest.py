@@ -1,8 +1,15 @@
-from flask import Flask, render_template, request, redirect, jsonify
+from flask import Flask, render_template, request, redirect, jsonify, url_for, flash
 import requests
 import json
 from bs4 import BeautifulSoup
 import sqlite3
+import pytz
+import os
+from datetime import datetime
+from flask_sqlalchemy import SQLAlchemy
+from flask_wtf import FlaskForm
+from wtforms import StringField, TextAreaField, SubmitField, SelectField
+from wtforms.validators import DataRequired 
 import googlemaps
 
 # 데이터베이스 파일 이름
@@ -85,10 +92,19 @@ url_navernews = 'https://search.naver.com/search.naver?where=news&query=%EB%89%B
 
 app = Flask(__name__)
 
-# 홈 페이지 경로
-@app.route('/')
-def index():
-    return redirect('/home')
+#커뮤니티 페이지용
+app.config['SECRET_KEY'] = 'mysecretkey1232'
+db_path = os.path.join(os.path.dirname(__file__), 'test.db')
+db_uri = 'sqlite:///{}'.format(db_path)
+app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+db = SQLAlchemy(app)
+
+
+seoul_tz = pytz.timezone('Asia/Seoul')
+
+
+
+
 
 # 댓글 페이지 경로
 @app.route('/comment')
@@ -114,7 +130,7 @@ def comment():
         return render_template('comment.html', data=data, comments=comments)
 
 # 홈 페이지 경로 (GET 및 POST 메서드)
-@app.route('/home', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def home():
     if request.method == 'POST':
         # 댓글 폼 제출 처리를 위한 로직
@@ -126,7 +142,7 @@ def home():
             c.execute("INSERT INTO comments (name, content) VALUES (?, ?)", (name, comment))
             conn.commit()
             conn.close()
-            return redirect('/home')
+            return redirect('/')
     else:
         # 데이터 가져와서 홈 페이지 렌더링
 
@@ -273,7 +289,91 @@ def update_WHOnews():
     return jsonify({'link' : link})
 
 
+
+#커뮤니티 페이지 전용 ----------------
+
+# 게시글
+class Post(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(120), nullable=False)
+    content = db.Column(db.String(500), nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    author = db.Column(db.String(100), nullable=False)
+    topic = db.Column(db.String(50))
+
+    def __repr__(self):
+        return '<Post %r>' % self.title
+    
+class PostForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired()])
+    content = TextAreaField('Content', validators=[DataRequired()])
+    submit = SubmitField('Post')
+    author = StringField('Author', validators=[DataRequired()])
+    topic = SelectField('Topic', choices=[('Disaster/Disease', 'Disaster/Disease'), ('Real-time', 'Real-time'), ('Others', 'Others')])
+
+#댓글
+class Comment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.String(200), nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    author = db.Column(db.String(100), nullable=False)
+
+class CommentForm(FlaskForm):
+    content = TextAreaField('Comment', validators=[DataRequired()])
+    submit = SubmitField('Submit')
+    author = StringField('Author', validators=[DataRequired()])
+
+
+@app.route('/community')
+def index():
+    page = request.args.get('page', 1, type=int)
+    posts = Post.query.order_by(Post.timestamp.desc()).paginate(page=page, per_page=10)
+    return render_template('community.html', posts=posts)
+
+@app.route('/community/create', methods=['GET', 'POST'])
+def create_post():
+    form = PostForm()
+    if form.validate_on_submit():
+        new_post = post = Post(title=form.title.data, content=form.content.data, author=form.author.data, topic=form.topic.data, timestamp=datetime.now(seoul_tz))
+
+        db.session.add(new_post)
+        db.session.commit()
+        return redirect(url_for('index'))
+    return render_template('create_post.html', form=form)
+
+@app.route('/community/post/<int:post_id>', methods=['GET', 'POST'])
+def post_detail(post_id):
+    post = Post.query.get_or_404(post_id)
+    comments = Comment.query.filter_by(post_id=post_id).all()
+    form = CommentForm()
+
+    if form.validate_on_submit():
+        comment = comment = Comment(content=form.content.data, author=form.author.data, post_id=post.id, timestamp=datetime.now(seoul_tz))
+
+        db.session.add(comment)
+        db.session.commit()
+        flash('Your comment has been added.', 'success')
+        return redirect(url_for('post_detail', post_id=post.id))
+
+    return render_template('post_detail.html', post=post, comments=comments, form=form)
+
+
+@app.route('/community/post/<int:post_id>/comment', methods=['GET', 'POST'])
+def comment_post(post_id):
+    form = CommentForm()
+    post = Post.query.get_or_404(post_id)
+    if form.validate_on_submit():
+        comment = Comment(content=form.content.data, author=form.author.data, post_id=post.id, timestamp=datetime.now(seoul_tz))
+        db.session.add(comment)
+        db.session.commit()
+        flash('Your comment has been added.', 'success')
+        return redirect(url_for('post_detail', post_id=post_id))
+    return render_template('comment_post.html', title='New Comment', form=form)
+
 # 애플리케이션 실행
 if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
     create_table()
     app.run(host='localhost', port=8015)

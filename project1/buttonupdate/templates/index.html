@@ -57,42 +57,62 @@
                 <!-- Page content-->
                 <div class="container-fluid">
                     <h1 class="mt-4">국내 정보</h1>
-                    <div id="map" style="width:600;height:400px;"></div>
-                    <br>
-                    <p>연합뉴스속보</p>
-                    <div id="newsArea"></div>
-                    <button id="newsButton">불러오기</button>
-                    <hr>
-                    <p>네이버뉴스 속보 검색결과</p>
-                    <div id="newsnaverArea"></div>
-                    <button id="newsnaverButton">불러오기</button>
-                    <hr>
-                    <p>api 재난문자</p>
-                    <div id="apimsgArea"></div>
-                    <button id="apimsgButton">업데이트</button>
-                    <hr>
-                    <p>api 재난문자 db 업데이트</p>
-                    <div id="apimsgArea_db"></div>
-                    <button id="apimsgButton_db">업데이트</button>
-                    <hr>
-                    <table>
-                        <tr>
-                            <th>time</th>
-                            <th>location</th>
-                            <th>msg</th>
-                            <th>type</th>
-                        </tr>
-                        {% for row in data %}
-                        <tr>
-                            <td>{{ row[0] }}</td>
-                            <td>{{ row[1] }}</td>
-                            <td>{{ row[2] }}</td>
-                            <td>{{ row[3] }}</td>
-                        </tr>
-                        {% endfor %}
-                    </table>
+                    <div class="container">
+                        <div class="row">
+                          <div id="map" style="height:600px;" class="col-sm-12 col-md-6">
+                            <!--<div id="map" style="width:600;height:400px;"></div>-->
+                            <!-- 여기에 첫 번째 요소의 내용을 넣습니다. -->
+                          </div>
+                          <div class="col-sm-12 col-md-6">
+                            <!-- 여기에 두 번째 요소의 내용을 넣습니다. -->
+                            <p>연합뉴스속보</p>
+                            <div id="newsArea">
+                                {{ yh_news | safe}}
+                            </div>
+                            
+                            <hr>
+                            <p>네이버뉴스 속보 검색결과</p>
+                            <div id="newsnaverArea">{{ nv_news }}</div>
+                            
+                            <hr>
+                            <h4>긴급/재난사항</h4>
+                            <table>
+                                <tr>
+                                    <th>time</th>
+                                    
+                                    <th>msg</th>
+                                </tr>
+                                {% for row in data_emerg %}
+                                <tr>
+                                    <td>{{ row[0] }}</td>
+                                    
+                                    <td>{{ row[2] }}</td>
+                                </tr>
+                                {% endfor %}
+                            </table>
+                            <hr>
+                            <h4>전체</h4>
+                            <table>
+                                <tr>
+                                    <th>time</th>
+                                    
+                                    <th>msg</th>
+                                    <th>type</th>
+                                </tr>
+                                {% for row in data %}
+                                <tr>
+                                    <td>{{ row[0] }}</td>
+                                    
+                                    <td>{{ row[2] }}</td>
+                                    <td>{{ row[3] }}</td>
+                                </tr>
+                                {% endfor %}
+                            </table>
+                          </div>
+                        </div>
+                      </div>
                     <br><br><br>
-                    <form method="POST" action="/home">
+                    <form method="POST" action="/">
                         <input type="text" name="name" placeholder="이름"><br>
                         <textarea name="comment" placeholder="댓글"></textarea><br>
                         <input type="submit" value="등록">

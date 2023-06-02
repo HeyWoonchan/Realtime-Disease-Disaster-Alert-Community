@@ -1,6 +1,6 @@
 var map = new google.maps.Map(document.getElementById('map'), {
     center: {lat: 37.27538, lng: 127.05488},
-    zoom: 6
+    zoom: 7
 });
 
 function update_marker(latitude, longitude, what){

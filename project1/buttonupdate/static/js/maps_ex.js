@@ -25,6 +25,7 @@ function update_marker(latitude, longitude, what){
 function update_marker_position() {
   $.getJSON('/update_external', function(data) { // DB 데이터 값 불러오기
       update_marker(data.latitude, data.longitude, data.what);
+      document.getElementById("notice").src = data.link
       iframe_update(data.link, "Ifrm_notice")
   });
   
@@ -71,6 +72,12 @@ function toggleIframe_WHO() {
         iframeContainer.hide();
     }
 }
+function openPopup() {
+    document.getElementById('popup').style.display = 'block';
+}
 
+function closePopup() {
+    document.getElementById('popup').style.display = 'none';
+}
 update_marker_position()
 update_WHOnews()

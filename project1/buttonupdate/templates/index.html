@@ -13,8 +13,7 @@
         <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=oa0k1d1gao"></script>
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script async
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnp17nNrPOjhrQk4Pp7HUVfMGzyqGw5eI&callback=initMap"> </script>
+        
         <style>
             .card {
                 border: none !important; /* Bootstrap의 기본 테두리 제거 */
@@ -140,7 +139,7 @@
 
         <script src="{{ url_for('static', filename='js/maps_in.js') }}"></script>
 
-
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnp17nNrPOjhrQk4Pp7HUVfMGzyqGw5eI&callback=initMap" async defer > </script>
         <script>
             var chartData = {{ chart_data|tojson }}; // 오류 아님
             var dates = {{ dates|tojson }};

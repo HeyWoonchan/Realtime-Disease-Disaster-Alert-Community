@@ -14,7 +14,38 @@
         <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=oa0k1d1gao"></script>
         <script async
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnp17nNrPOjhrQk4Pp7HUVfMGzyqGw5eI&callback=initMap"> </script>
-        
+        <style>
+            /* 팝업 스타일 */
+            #popup {
+                display: none;
+                position: fixed;
+                width: 100%;
+                height: 100%;
+                top: 0;
+                left: 0;
+                z-index: 100;
+                background-color: rgba(0, 0, 0, 0.5); /* 뒷 배경을 반투명하게 만듭니다. */
+            }
+
+            /* 닫기 버튼 스타일 */
+            #close {
+                position: absolute;
+                right: 10px;
+                top: 10px;
+                cursor: pointer;
+                color: white; /* 닫기 버튼 색상을 흰색으로 만듭니다. */
+            }
+
+            /* iframe 스타일 */
+            #content {
+                position: relative;
+                width: 80%;
+                height: 80%;
+                top: 10%;
+                left: 10%;
+                background-color: white;
+            }
+        </style>
 
     </head>
     <body>
@@ -23,10 +54,10 @@
             <div class="border-end bg-white" id="sidebar-wrapper">
                 <div class="sidebar-heading border-bottom bg-light">Start Bootstrap</div>
                 <div class="list-group list-group-flush">
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!" onclick="location.href='/'">국내</a>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!" onclick="location.href='/external'">해외</a>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!" onclick="location.href='/community'">커뮤니티</a>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!">퀴즈</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/">국내</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/external">해외</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/community">커뮤니티</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/#">퀴즈</a>
                 </div>
             </div>
             <!-- Page content wrapper-->
@@ -59,19 +90,25 @@
                     <div id="map" style="width: 1000px;height: 800px;"></div>
                     
                     <div>
-                        <input type="button" onclick="toggleIframe_notice()" value="안전 공지 보기" style="width:130px; height:50px; padding-top: 2px"></button>
+                        <button onclick="openPopup()" style="width:130px; height:50px; padding-top: 2px">안전 공지 보기</button>
                         <input type="button" onclick="toggleIframe_WHO()" value="WHO 최근 기사 보기" style="width:200px; height:50px; padding-top: 2px"></button>
                         <hr>
-                        <div id="iframeContainer_notice" style="display: none; padding-top: 2px">
-                            <p>안전 공지<p>
-                            <div style="position: absolute; top: -360px; left: 0px;"></div>
-                            <iframe name="Ifrm_notice" id="Ifrm_notice" src="" height="860px" width="880px"></iframe>
+                        <!-- 팝업 열기 버튼 -->
+                        
+
+                        <!-- 팝업 -->
+                        <div id="popup">
+                            <span id="close" onclick="closePopup()">닫기</span>
+                            <div id="content">
+                                <iframe id="notice"src="https://example.com" width="100%" height="100%"></iframe>
+                            </div>
                         </div>
                         <div id="iframeContainer_WHO" style="display: none; padding-top: 2px">
                             <p>WHO 최근 기사<p>
                             <div style="position: absolute; top: -360px; left: 0px;"></div>
                             <iframe name="Ifrm_WHOnews" id="Ifrm_WHOnews" src="" height="860px" width="880px"></iframe>
                         </div>
+                        
                     </div>
                         
                     </div>

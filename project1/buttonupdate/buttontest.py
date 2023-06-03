@@ -321,24 +321,30 @@ def update_news_naver():
     return news_articles
 
 # 국내 마커 업데이트를 위한 API 경로
+
 @app.route('/update_marker_internal')
 def update_marker_in():
     con = sqlite3.connect(DB_internal_msg, isolation_level=None)
     cursor = con.cursor()
     cursor.execute('select * from my_table order by create_date desc limit 3')
-    gotdata = cursor.fetchone()
-    where = gotdata[1]
-    what = gotdata[2]
+    gotdata = cursor.fetchall()
 
     api_key = 'AIzaSyCnp17nNrPOjhrQk4Pp7HUVfMGzyqGw5eI'
     maps = googlemaps.Client(key=api_key)
 
-    results = maps.geocode(where)
+    marker_data = []
 
-    for result in results:
-        address = result['geometry']['location']
-        print(address['lat'], address['lng'], what)
-        return jsonify({'latitude' : address['lat'], 'longitude': address['lng'], 'what' : what})
+    for row in gotdata:
+        where = row[1]
+        what = row[2]
+        results = maps.geocode(where)
+
+        for result in results:
+            address = result['geometry']['location']
+            print(address['lat'], address['lng'], what)
+            marker_data.append({'latitude' : address['lat'], 'longitude': address['lng'], 'what' : what})
+    
+    return jsonify(marker_data)
 
 
 # 해외 안전 정보 업데이트를 위한 API 경로

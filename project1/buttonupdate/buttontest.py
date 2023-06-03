@@ -325,7 +325,7 @@ def update_news_naver():
 def update_marker_in():
     con = sqlite3.connect(DB_internal_msg, isolation_level=None)
     cursor = con.cursor()
-    cursor.execute('select * from my_table order by create_date desc limit 1')
+    cursor.execute('select * from my_table order by create_date desc limit 3')
     gotdata = cursor.fetchone()
     where = gotdata[1]
     what = gotdata[2]

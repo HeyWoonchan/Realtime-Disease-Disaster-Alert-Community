@@ -24,8 +24,7 @@
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/">국내</a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/external">해외</a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/community">커뮤니티</a>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!">재난 속에서 살아남기</a>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!">나라면 어떻게?</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!">퀴즈</a>
                 </div>
             </div>
             <!-- Page content wrapper-->
@@ -54,48 +53,51 @@
                 </nav>
                 <!-- Page content-->
                 <div class="container-fluid">
-                    <h1>{{ post.title }} by {{ post.author }}</h1>
-                    <p>{{ post.content }}</p>
-                    <small>{{ post.timestamp.strftime('%Y-%m-%d %H:%M') }}</small>
+                    <div class="container mt-5">
+                        <div class="card">
+                            <div class="card-body">
+                                <h1 class="card-title">{{ post.title }}</h1>
+                                <h5 class="card-subtitle mb-2 text-muted">by {{ post.author }}</h5>
+                                <p class="card-text">{{ post.content }}</p>
+                                <p class="card-text"><small class="text-muted">{{ post.timestamp.strftime('%Y-%m-%d %H:%M') }}</small></p>
+                            </div>
+                        </div>
                     
-                    <h2>Comments</h2>
-                    <ul>
-                    {% for comment in post.comments %}
-                        <li>{{ comment.author }}: {{ comment.content }}</li>
-                    {% endfor %}
-                    </ul>
-
-
-                    {% for comment in comments %}
-                    <div class="comment">
-                        <div class="content">
-                            {{ comment.content }}
-                        </div>
-                        <div class="author">
-                            {{ comment.author }}
-                        </div>
-                        <div class="timestamp">
-                            {{ comment.timestamp.strftime('%Y-%m-%d %H:%M') }}
-                        </div>
+                        <h2 class="mt-4">Comments</h2>
+                        {% for comment in post.comments %}
+                            <div class="card mt-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ comment.author }}</h5>
+                                    <p class="card-text">{{ comment.content }}</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    
+                        {% for comment in comments %}
+                            <div class="card mt-3">
+                                <div class="card-body">
+                                    <p class="card-text">{{ comment.content }}</p>
+                                    <h5 class="card-title">{{ comment.author }}</h5>
+                                    <p class="card-text"><small class="text-muted">{{ comment.timestamp.strftime('%Y-%m-%d %H:%M') }}</small></p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    
+                        <form action="{{ url_for('comment_post', post_id=post.id) }}" method="post" class="mt-5">
+                            {{ form.hidden_tag() }}
+                            <div class="form-group">
+                                {{ form.author.label }}<br>
+                                {{ form.author(size=32, class="form-control") }}
+                            </div>
+                            <div class="form-group">
+                                {{ form.content.label }}<br>
+                                {{ form.content(size=32, class="form-control") }}
+                            </div>
+                            {{ form.submit(class="btn btn-primary") }}
+                        </form>
+                    
+                        <a href="{{ url_for('index') }}" class="btn btn-secondary mt-3">Back to list</a>
                     </div>
-                    <br>
-                    {% endfor %}
-
-
-                    <form action="{{ url_for('comment_post', post_id=post.id) }}" method="post">
-                        {{ form.hidden_tag() }}
-                        <p>
-                            {{ form.author.label }}<br>
-                            {{ form.author(size=32) }}
-                        </p>
-                        <p>
-                            {{ form.content.label }}<br>
-                            {{ form.content(size=32) }}
-                        </p>
-                        <p>{{ form.submit() }}</p>
-                    </form>
-
-                    <a href="{{ url_for('index') }}">Back to list</a>
                 </div>
             </div>
         </div>

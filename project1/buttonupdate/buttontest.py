@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, jsonify, url_for, f
 import requests, json, sqlite3, pytz, os, googlemaps, time
 from bs4 import BeautifulSoup
 from datetime import datetime
+from urllib.parse import urljoin
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, SubmitField, SelectField
@@ -15,6 +16,7 @@ DB_external_msg = 'ForSafeTrip.db'
 DB_WHOnews = 'ExternalNews.db'
 
 last_execution_time = 0
+last_execution_time_safetrip = 0
 
 #재난문자 type으로 차트를 생성
 def get_chart_data():
@@ -59,14 +61,14 @@ def get_msg_db():
 def get_msg_db_emerg():
     conn = sqlite3.connect(DB_internal_msg)
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM my_table WHERE type IN ('disaster', 'emergency') ORDER BY create_date DESC LIMIT 4")
+    cursor.execute("SELECT * FROM my_table WHERE type IN ('disaster', 'emergency') ORDER BY create_date DESC LIMIT 3")
     data = cursor.fetchall()
 
     cursor.close()
     conn.close()
     return data
 
-# 메시지 데이터베이스 업데이트 API 경로
+# 재난문자 데이터베이스 업데이트 함수
 def update_msg_db():
     response = requests.get(url_api)
     jdata = response.json()
@@ -145,8 +147,75 @@ def create_table():
 url_news = "https://www.yna.co.kr/theme/breaknews-history"
 url_api = "http://apis.data.go.kr/1741000/DisasterMsg3/getDisasterMsg1List?serviceKey=DCEWLmC5o0ec6lJ%2FsTpRPUFLDnn8eH24STfRT5ZxbqR9BQBOk0i484ELM%2BBMVgC3YDKc8SiGrtkcs17Skrp97A%3D%3D&pageNo=1&numOfRows=20&type=json"
 url_navernews = 'https://search.naver.com/search.naver?where=news&query=%EB%89%B4%EC%8A%A4%20%EC%86%8D%EB%B3%B4&sort=1&sm=tab_smr&nso=so:dd,p:all,a:all'
-
+url_safetrip = "https://www.0404.go.kr/dev/newest_list.mofa"
+url_safetrip_view = "https://www.0404.go.kr/dev/newest_view.mofa"
 app = Flask(__name__)
+
+
+def update_safetrip():
+    conn = sqlite3.connect('ForSafeTrip.db')
+    cursor = conn.cursor()
+
+    cursor.execute('DELETE FROM ForSafeTrip')
+
+
+    # SafeTrip 테이블 생성
+    create_table_query = '''
+    CREATE TABLE IF NOT EXISTS ForSafeTrip (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        country TEXT,
+        title TEXT,
+        link TEXT
+    )
+    '''
+    cursor.execute(create_table_query)
+
+    # 페이지 순회 및 데이터 크롤링
+    for page in range(1, 2):  # 1부터 5까지의 페이지 크롤링
+        params = {
+            "id": "",
+            "pagenum": str(page),
+            "mst_id": "MST0000000000041",
+            "ctnm": "",
+            "div_cd": "",
+            "st": "title",
+            "stext": ""
+        }
+
+        response = requests.get(url_safetrip, params=params)
+        soup = BeautifulSoup(response.content, 'html.parser')
+        global_news = soup.find_all('td', class_='subject')
+        global_countries = soup.find_all('td', class_='bb_ctr1')
+
+        for news, country in zip(global_news, global_countries):
+            title = news.text.strip()
+            link = news.a
+
+            if link is not None:
+                # 자바스크립트 형식의 링크를 URL 형식으로 변환
+                link_text = urljoin(url_safetrip, link['href']).replace("javascript:goview(", "").replace(")", "").replace("'","")
+                link_text = f"{url_safetrip_view}?id={link_text}&pagenum=1&mst_id=MST0000000000041&ctnm=&div_cd=&st=title&stext="
+            else:
+                link_text = ""
+
+            country_name = country.text.strip()
+
+            # 데이터 삽입
+            if country_name != '전체국가':
+                insert_query = 'INSERT INTO ForSafeTrip (country, title, link) VALUES (?, ?, ?)'
+                cursor.execute(insert_query, (country_name, title, link_text))
+
+            print(f"국가: {country_name}")
+            print(f"제목: {title}")
+            print(f"링크: {link_text}")
+            print()
+
+        print(f"--- {page} 페이지 크롤링 완료 ---")
+        print()
+
+    # 변경사항 저장
+    conn.commit()
+    conn.close()
 
 #커뮤니티 페이지용
 app.config['SECRET_KEY'] = 'mysecretkey1232'
@@ -220,17 +289,22 @@ def home():
 #해외 페이지 
 @app.route('/external')
 def external():
+    global last_execution_time_safetrip
+    nowtime = time.time()
+    if nowtime-last_execution_time_safetrip>60:
+        last_execution_time_safetrip=nowtime
+        update_safetrip()
     return render_template('external.html')
 
 
-# 재난 메시지 업데이트를 위한 API 경로
+# 재난 메시지 업데이트를 위한 함수
 @app.route('/api_disaster_update', methods=['POST'])
 def get_disaster_messages():
     response = requests.get(url_api)
 
     return response.json()
 
-# 뉴스 업데이트를 위한 API 경로
+# 뉴스 업데이트를 위한 함수
 def update_news():
     response = requests.get(url_news)
     soup = BeautifulSoup(response.content, 'html.parser')

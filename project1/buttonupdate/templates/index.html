@@ -15,7 +15,23 @@
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script async
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnp17nNrPOjhrQk4Pp7HUVfMGzyqGw5eI&callback=initMap"> </script>
+        <style>
+            .card {
+                border: none !important; /* Bootstrap의 기본 테두리 제거 */
+                box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); /* 그림자 추가 */
+                transition: 0.3s; /* 그림자 효과의 변화 속도 조정 */
+                background-color: #fff; /* 배경색을 흰색으로 설정 */
+                margin: 15px
+            }
 
+            .card:hover {
+                box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 12px 40px 0 rgba(0, 0, 0, 0.19); /* 마우스 오버 시 그림자 효과 강화 */
+            }
+
+            .card-body {
+                padding: 1em; /* 카드 내부 패딩 조정 */
+            }
+        </style>
     </head>
     <body>
         <div class="d-flex" id="wrapper">
@@ -26,8 +42,7 @@
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!" onclick="location.href='/'">국내</a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!" onclick="location.href='/external'">해외</a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!" onclick="location.href='/community'">커뮤니티</a>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!">재난 속에서 살아남기</a>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!">나라면 어떻게?</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!">퀴즈</a>
                 </div>
             </div>
             <!-- Page content wrapper-->
@@ -57,14 +72,34 @@
                 <!-- Page content-->
                 <div class="container-fluid">
                     <h1 class="mt-4">국내 정보</h1>
+                    <hr>
                     <div class="container">
                         <div class="row">
-                          <div id="map" style="height:600px;" class="col-sm-12 col-md-6">
+                          <div id="map" style="height:1000px;" class="col-sm-12 col-md-6">
                             <!--<div id="map" style="width:600;height:400px;"></div>-->
                             <!-- 여기에 첫 번째 요소의 내용을 넣습니다. -->
                           </div>
                           <div class="col-sm-12 col-md-6">
                             <!-- 여기에 두 번째 요소의 내용을 넣습니다. -->
+                            {% for row in data_emerg %}
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">긴급/재난 {{ row[1] }} {{ row[0] }}</h5>
+                                    <p class="card-text">{{ row[2] }}</p>
+                                </div>
+                                </div>
+                            {% endfor %}
+                            <hr>
+
+                            {% for row in data %}
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ row[3] }} {{ row[1] }} {{ row[0] }}</h5>
+                                    <p class="card-text">{{ row[2] }}</p>
+                                </div>
+                                </div>
+                            {% endfor %}
+                            <hr>
                             <p>연합뉴스속보</p>
                             <div id="newsArea">
                                 {{ yh_news | safe}}
@@ -73,44 +108,10 @@
                             <hr>
                             <p>네이버뉴스 속보 검색결과</p>
                             <div id="newsnaverArea">{{ nv_news }}</div>
-                            
-                            <hr>
-                            <h4>긴급/재난사항</h4>
-                            <table>
-                                <tr>
-                                    <th>time</th>
-                                    
-                                    <th>msg</th>
-                                </tr>
-                                {% for row in data_emerg %}
-                                <tr>
-                                    <td>{{ row[0] }}</td>
-                                    
-                                    <td>{{ row[2] }}</td>
-                                </tr>
-                                {% endfor %}
-                            </table>
-                            <hr>
-                            <h4>전체</h4>
-                            <table>
-                                <tr>
-                                    <th>time</th>
-                                    
-                                    <th>msg</th>
-                                    <th>type</th>
-                                </tr>
-                                {% for row in data %}
-                                <tr>
-                                    <td>{{ row[0] }}</td>
-                                    
-                                    <td>{{ row[2] }}</td>
-                                    <td>{{ row[3] }}</td>
-                                </tr>
-                                {% endfor %}
-                            </table>
                           </div>
                         </div>
                       </div>
+                    <hr>
                     <br><br><br>
                     <form method="POST" action="/">
                         <input type="text" name="name" placeholder="이름"><br>

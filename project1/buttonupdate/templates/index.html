@@ -17,12 +17,8 @@
         <style>
             #map {
                 border-radius: 15px; /* 둥근 가장자리 추가 */
-                box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); /* 그림자 추가 */
-                transition: 0.3s; /* 그림자 효과의 변화 속도 조정 */
-            }
-
-            #map:hover {
-                box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 12px 40px 0 rgba(0, 0, 0, 0.19); /* 마우스 오버 시 그림자 효과 강화 */
+                
+                
             }
             .card {
                 border: none !important; /* Bootstrap의 기본 테두리 제거 */
@@ -84,11 +80,14 @@
                     <hr>
                     <div class="container">
                         <div class="row">
-                          <div id="map" style="height:1000px;" class="col-sm-12 col-md-6">
-                            <!--<div id="map" style="width:600;height:400px;"></div>-->
-                            <!-- 여기에 첫 번째 요소의 내용을 넣습니다. -->
-                          </div>
-                          <div class="col-sm-12 col-md-6">
+                            <div class="col-sm-12 col-md-6">
+                                <div class="card" style="height:800px;">
+                                  <div id="map" class="card-body">
+                                    <!-- Map will be placed here. -->
+                                  </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12 col-md-6">
                             <!-- 여기에 두 번째 요소의 내용을 넣습니다. -->
                             {% for row in data_emerg %}
                             <div class="card">
@@ -96,7 +95,7 @@
                                     <h5 class="card-title">긴급/재난 {{ row[1] }} {{ row[0] }}</h5>
                                     <p class="card-text">{{ row[2] }}</p>
                                 </div>
-                                </div>
+                            </div>
                             {% endfor %}
                             <hr>
 

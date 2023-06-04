@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>퀴즈 웹페이지</title>
+    <!-- CSS 파일 링크 -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- 퀴즈 내용 -->
+    <h1>재난에서 살아남기</h1>
+    <p>재난 상황별 문제를 풀고 쿠민이를 살려라!</p>
+
+    <!-- 질문과 선택지 -->
+    <h2>질문 1</h2>
+    <p>[대설] 차량 운행 시에는 고속 운행을 통해 눈이 쌓인 구간을 재빨리 벗어난다.</p>
+    <ul>
+        <li><input type="radio" name="question1" value="참"> 선택지 1</li>
+        <li><input type="radio" name="question1" value="거짓"> 선택지 2</li>
+    </ul>
+
+    <h2>질문 2</h2>
+    <p>[화산 폭발] 화산재 낙하 중에는각막 손상 위험이 있으므로 콘택트렌즈를 착용하지 않는다.</p>
+    <ul>
+        <li><input type="radio" name="question2" value="참"> 선택지 1</li>
+        <li><input type="radio" name="question2" value="option2"> 선택지 2</li>
+    </ul>
+
+    
+    <h2>질문 3</h2>
+    <p>[산불] 산불로 위험에 처했을 경우에는 바람을 등지고 주변의 낙엽, 나뭇가지 등 연소물질을 신속히 제거한 후 소방서, 경찰서 등에 신고한 후 낮은 자세로 엎드려 구조를 기다린다.</p>
+    <ul>
+        <li><input type="radio" name="question3" value="참"> 선택지 1</li>
+        <li><input type="radio" name="question3" value="거짓"> 선택지 2</li>
+    </ul>
+    
+    <h2>질문 4</h2>
+    <p>[정보통신 사고] 통신재난 발생 시 이동통신 3사는 상용 와이파이를 통신사 상관없이 개방한다.</p>
+    <ul>
+        <li><input type="radio" name="question4" value="참"> 선택지 1</li>
+        <li><input type="radio" name="question4" value="거짓"> 선택지 2</li>
+    </ul>
+    
+    <h2>질문 5</h2>
+    <p>[화재] 손등으로 출입문 손잡이를 만져보아 손잡이가 따뜻하거나 뜨거우면 문 반대쪽에 불이 난 것이므로 문을 열지 않는다.</p>
+    <ul>
+        <li><input type="radio" name="question5" value="참"> 선택지 1</li>
+        <li><input type="radio" name="question5" value="거짓"> 선택지 2</li>
+    </ul>
+    
+    <h2>질문 6</h2>
+    <p>[지진] 건물의 균열을 발견하면 직접 재빨리 보수하고 보강한다.</p>
+    <ul>
+        <li><input type="radio" name="question6" value="참"> 선택지 1</li>
+        <li><input type="radio" name="question6" value="거짓"> 선택지 2</li>
+    </ul>
+    
+    <h2>질문 7</h2>
+    <p>[화학물질 사고] 화학사고로 발생한 독성 가스는 대부분 공기보다 가볍기 때문에 실외에 있는 경우 낮은 곳으로 대피해야 한다.</p>
+    <ul>
+        <li><input type="radio" name="question7" value="참"> 선택지 1</li>
+        <li><input type="radio" name="question7" value="거짓"> 선택지 2</li>
+    </ul>
+    
+    <h2>질문 8</h2>
+    <p>[도로터널 사고] 화재가 커진 경우에는 재빨리 연기 반대방향으로 터널 내 유도표시등을 따라 밖이나 피난연결통로를 통해 터널로 대피합니다.</p>
+    <ul>
+        <li><input type="radio" name="question8" value="참"> 선택지 1</li>
+        <li><input type="radio" name="question8" value="거짓"> 선택지 2</li>
+    </ul>
+    
+    <h2>질문 9</h2>
+    <p>[미세먼지] 황사∙미세먼지가 진행되는 도중에는 지속적으로 환기를 하고 청소를 한다.</p>
+    <ul>
+        <li><input type="radio" name="question9" value="참"> 선택지 1</li>
+        <li><input type="radio" name="question9" value="거짓"> 선택지 2</li>
+    </ul>
+    
+    <h2>질문 10</h2>
+    <p>[인공 우주물체 추락] 인근에 엄폐물이 없으면 낙하물의 진행 반대 방향으로 대피한다.</p>
+    <ul>
+        <li><input type="radio" name="question10" value="참"> 선택지 1</li>
+        <li><input type="radio" name="question10" value="거짓"> 선택지 2</li>
+    </ul>
+
+    <!-- 결과 제출 버튼 -->
+    <button type="button" onclick="checkAnswers()">결과 제출</button>
+
+    <!-- 게이지 표시 -->
+    <div id="gauge"></div>
+
+    <!-- JavaScript 파일 링크 -->
+    <script src="script.js"></script>
+</body>
+</html>

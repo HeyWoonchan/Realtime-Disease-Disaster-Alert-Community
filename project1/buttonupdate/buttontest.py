@@ -462,6 +462,14 @@ def comment_post(post_id):
 def quiz():
     return render_template('quiz.html')
 
+@app.route('/quiz/start')
+def quiz_start():
+    return render_template('quizstart.html')
+
+@app.route('/quiz/start/submit')
+def quiz_result():
+    return render_template('result.html')
+
 
 # 애플리케이션 실행
 if __name__ == "__main__":

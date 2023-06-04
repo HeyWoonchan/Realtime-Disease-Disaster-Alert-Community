@@ -68,6 +68,16 @@ def get_msg_db_emerg():
     conn.close()
     return data
 
+def get_db_safetrip():
+    conn = sqlite3.connect(DB_external_msg)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM ForSafeTrip ORDER BY id LIMIT 3")
+    data = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+    return data
+
 # 재난문자 데이터베이스 업데이트 함수
 def update_msg_db():
     response = requests.get(url_api)
@@ -294,7 +304,11 @@ def external():
     if nowtime-last_execution_time_safetrip>60:
         last_execution_time_safetrip=nowtime
         update_safetrip()
-    return render_template('external.html')
+
+    data = get_db_safetrip()
+
+
+    return render_template('external.html', data = data)
 
 
 # 재난 메시지 업데이트를 위한 함수

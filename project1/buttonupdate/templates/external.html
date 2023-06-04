@@ -15,6 +15,27 @@
         <script async
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnp17nNrPOjhrQk4Pp7HUVfMGzyqGw5eI&callback=initMap"> </script>
         <style>
+            #map {
+                border-radius: 15px; /* 둥근 가장자리 추가 */
+                
+                
+            }
+            .card {
+                border: none !important; /* Bootstrap의 기본 테두리 제거 */
+                border-radius: 15px !important;
+                box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); /* 그림자 추가 */
+                transition: 0.3s; /* 그림자 효과의 변화 속도 조정 */
+                background-color: #fff; /* 배경색을 흰색으로 설정 */
+                margin: 15px
+            }
+
+            .card:hover {
+                box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 12px 40px 0 rgba(0, 0, 0, 0.19); /* 마우스 오버 시 그림자 효과 강화 */
+            }
+
+            .card-body {
+                padding: 1em; /* 카드 내부 패딩 조정 */
+            }
             /* 팝업 스타일 */
             #popup {
                 display: none;
@@ -86,8 +107,38 @@
                 </nav>
                 <!-- Page content-->
                 <div class="container-fluid">
-                    <h1 class="mt-4">국외 정보</h1> </div>
-                    <div id="map" style="width: 1000px;height: 800px;"></div>
+                    <h1 class="mt-4">국외 정보</h1>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-sm-12 col-md-6">
+                                <div class="card" style="height:800px;">
+                                  <div id="map" class="card-body">
+                                    <!-- Map will be placed here. -->
+                                  </div>
+                                </div>
+                                
+                            </div>
+                            <div class="col-sm-12 col-md-6">
+                                <!-- 여기에 두 번째 요소의 내용을 넣습니다. -->
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">빈자리 채우기</h5>
+                                        <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec consequat ultrices tellus, ut lobortis nisi maximus at. Nulla facilisi. Sed ultrices eleifend metus ac vestibulum. Integer euismod sem vitae volutpat sagittis. Fusce id malesuada odio, sed interdum nisl. Maecenas varius ex eu mauris tempus, id feugiat erat gravida. Phasellus pellentesque, metus nec interdum aliquet, neque ex eleifend tortor, eget convallis lectus turpis non lorem. Vestibulum a lectus massa. Mauris sed risus non orci sollicitudin feugiat. Nullam bibendum hendrerit nunc ac tincidunt.</p>
+                                    </div>
+                                </div>
+                                {% for row in data %}
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ row[1] }}</h5>
+                                        <p class="card-text">{{ row[2] }}</p>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                          </div>
+                        </div>
+                    </div>
+                    <hr>
+                    
                     
                     <div>
                         <button onclick="openPopup()" style="width:130px; height:50px; padding-top: 2px">안전 공지 보기</button>

@@ -14,6 +14,7 @@ DB_news = 'news.db'
 DB_internal_msg = 'database.db'
 DB_external_msg = 'ForSafeTrip.db'
 DB_WHOnews = 'ExternalNews.db'
+DB_quiz = 'quiz.db'
 
 last_execution_time = 0
 last_execution_time_safetrip = 0
@@ -455,6 +456,12 @@ def comment_post(post_id):
         flash('Your comment has been added.', 'success')
         return redirect(url_for('post_detail', post_id=post_id))
     return render_template('comment_post.html', title='New Comment', form=form)
+
+#퀴즈 페이지 코드--------------------------------------------------
+@app.route('/quiz')
+def quiz():
+    return render_template('quiz.html')
+
 
 # 애플리케이션 실행
 if __name__ == "__main__":

@@ -109,7 +109,7 @@
                                 {% for row in data_emerg %}
                                 <div class="card">
                                     <div class="card-body">
-                                        <h5 class="card-title">긴급/재난 {{ row[1] }} {{ row[0] }}</h5>
+                                        <h5 class="card-title">[ 긴급/재난 ] {{ row[1] }} {{ row[0] }}</h5>
                                         <p class="card-text">{{ row[2] }}</p>
                                     </div>
                                 </div>
@@ -119,7 +119,15 @@
                                 {% for row in data %}
                                 <div class="card">
                                     <div class="card-body">
-                                        <h5 class="card-title">{{ row[3] }} {{ row[1] }} {{ row[0] }}</h5>
+                                        <h5 class="card-title">[{% if row[3] == "missing" %}
+                                            실종
+                                        {% elif row[3] == "disaster" %}
+                                            재난
+                                        {% elif row[3] == "emergency" %}
+                                            긴급
+                                        {% else %}
+                                            {{ row[3] }}
+                                        {% endif %}] {{ row[1] }} {{ row[0] }}</h5>
                                         <p class="card-text">{{ row[2] }}</p>
                                     </div>
                                     </div>

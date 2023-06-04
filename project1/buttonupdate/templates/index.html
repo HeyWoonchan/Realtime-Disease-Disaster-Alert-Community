@@ -86,54 +86,81 @@
                                     <!-- Map will be placed here. -->
                                   </div>
                                 </div>
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">댓글 목록</h5>
+                                        {% for comment in comments %}
+                                        <li>{{ comment[1] }}: {{ comment[2] }}</li>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-body">
+                                        <form method="POST" action="/">
+                                            <input type="text" name="name" placeholder="이름"><br>
+                                            <textarea name="comment" placeholder="댓글"></textarea><br>
+                                            <input type="submit" value="등록">
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-sm-12 col-md-6">
-                            <!-- 여기에 두 번째 요소의 내용을 넣습니다. -->
-                            {% for row in data_emerg %}
-                            <div class="card">
-                                <div class="card-body">
-                                    <h5 class="card-title">긴급/재난 {{ row[1] }} {{ row[0] }}</h5>
-                                    <p class="card-text">{{ row[2] }}</p>
+                                <!-- 여기에 두 번째 요소의 내용을 넣습니다. -->
+                                {% for row in data_emerg %}
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">[ 긴급/재난 ] {{ row[1] }} {{ row[0] }}</h5>
+                                        <p class="card-text">{{ row[2] }}</p>
+                                    </div>
                                 </div>
-                            </div>
-                            {% endfor %}
-                            <hr>
+                                {% endfor %}
+                                <hr>
 
-                            {% for row in data %}
-                            <div class="card">
-                                <div class="card-body">
-                                    <h5 class="card-title">{{ row[3] }} {{ row[1] }} {{ row[0] }}</h5>
-                                    <p class="card-text">{{ row[2] }}</p>
+                                {% for row in data %}
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">[{% if row[3] == "missing" %}
+                                            실종
+                                        {% elif row[3] == "disaster" %}
+                                            재난
+                                        {% elif row[3] == "emergency" %}
+                                            긴급
+                                        {% else %}
+                                            {{ row[3] }}
+                                        {% endif %}] {{ row[1] }} {{ row[0] }}</h5>
+                                        <p class="card-text">{{ row[2] }}</p>
+                                    </div>
+                                    </div>
+                                {% endfor %}
+                                <hr>
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">연합뉴스속보</h5>
+                                        <p class="card-text">{{ yh_news | safe}}</p>
+                                        <h5 class="card-title">네이버뉴스 속보 검색결과</h5>
+                                        <p class="card-text">{{ nv_news }}</p>
+                                    </div>
                                 </div>
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">빈자리 채우기</h5>
+                                        <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec consequat ultrices tellus, ut lobortis nisi maximus at. Nulla facilisi. Sed ultrices eleifend metus ac vestibulum. Integer euismod sem vitae volutpat sagittis. Fusce id malesuada odio, sed interdum nisl. Maecenas varius ex eu mauris tempus, id feugiat erat gravida. Phasellus pellentesque, metus nec interdum aliquet, neque ex eleifend tortor, eget convallis lectus turpis non lorem. Vestibulum a lectus massa. Mauris sed risus non orci sollicitudin feugiat. Nullam bibendum hendrerit nunc ac tincidunt.</p>
+                                    </div>
                                 </div>
-                            {% endfor %}
-                            <hr>
-                            <p>연합뉴스속보</p>
-                            <div id="newsArea">
-                                {{ yh_news | safe}}
-                            </div>
-                            
-                            <hr>
-                            <p>네이버뉴스 속보 검색결과</p>
-                            <div id="newsnaverArea">{{ nv_news }}</div>
                           </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12 col-md-12">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <canvas id="myChart" style="width:100%;"></canvas>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                       </div>
                     <hr>
-                    <br><br><br>
-                    <form method="POST" action="/">
-                        <input type="text" name="name" placeholder="이름"><br>
-                        <textarea name="comment" placeholder="댓글"></textarea><br>
-                        <input type="submit" value="등록">
-                    </form>
-                    <br>
-                    <h2>이전 댓글</h2>
-                    <ul>
-                        {% for comment in comments %}
-                        <li>{{ comment[1] }}: {{ comment[2] }}</li>
-                        {% endfor %}
-                    </ul>
-                    <canvas id="myChart" width="400" height="200"></canvas>
+                    
                 </div>
             </div>
         </div>
@@ -196,7 +223,10 @@
                     color += letters[Math.floor(Math.random() * 16)];
                 }
                 return color;
-            }    
+            }
+            window.addEventListener('resize', () => {
+                myChart.resize();
+            });    
         </script>
     </body>
 </html>

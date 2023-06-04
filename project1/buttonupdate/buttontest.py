@@ -58,6 +58,7 @@ def get_msg_db():
     conn.close()
     return data
 
+#재난문자 db에서 긴급문자만 불러오기
 def get_msg_db_emerg():
     conn = sqlite3.connect(DB_internal_msg)
     cursor = conn.cursor()
@@ -68,6 +69,7 @@ def get_msg_db_emerg():
     conn.close()
     return data
 
+#해외안전정보 불러오기
 def get_db_safetrip():
     conn = sqlite3.connect(DB_external_msg)
     cursor = conn.cursor()
@@ -477,7 +479,7 @@ def comment_post(post_id):
         return redirect(url_for('post_detail', post_id=post_id))
     return render_template('comment_post.html', title='New Comment', form=form)
 
-# 애플리케이션 실행
+
 if __name__ == "__main__":
     os.chdir("project1/buttonupdate")
     with app.app_context():

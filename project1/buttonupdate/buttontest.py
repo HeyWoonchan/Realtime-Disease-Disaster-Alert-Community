@@ -337,6 +337,7 @@ def update_marker_in():
     for row in gotdata:
         where = row[1]
         what = row[2]
+        
         results = maps.geocode(where)
 
         for result in results:
@@ -352,18 +353,24 @@ def update_marker_in():
 def update_marker_ex():
     con = sqlite3.connect(DB_external_msg, isolation_level=None)
     cursor = con.cursor()
-    cursor.execute('select * from ForSafeTrip order by id asc limit 1')
-    gotdata = cursor.fetchone()
-    where = gotdata[1]
-    what = gotdata[2]
-    link = gotdata[3]
+    cursor.execute('select * from ForSafeTrip order by id asc limit 3')
+    gotdata = cursor.fetchall()
     api_key = 'AIzaSyCnp17nNrPOjhrQk4Pp7HUVfMGzyqGw5eI'
     maps = googlemaps.Client(key=api_key)
-    results = maps.geocode(where)
-    for result in results:
-        address = result['geometry']['location']
-        print(address['lat'], address['lng'], what)
-        return jsonify({'latitude' : address['lat'], 'longitude': address['lng'], 'what' : what, "link":link})
+
+    marker_data = []
+    for row in gotdata:
+        where = row[1]
+        what = row[2]
+        link = row[3]
+        results = maps.geocode(where)
+
+        for result in results:
+            address = result['geometry']['location']
+            print(address['lat'], address['lng'], what)
+            marker_data.append({'latitude' : address['lat'], 'longitude': address['lng'], 'what' : what, 'link':link})
+    
+    return jsonify(marker_data)
     
 @app.route('/update_WHOnews')
 def update_WHOnews():
@@ -462,4 +469,4 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
     create_table()
-    app.run(host='localhost', port=8000)
+    app.run(host='localhost', port=8023)

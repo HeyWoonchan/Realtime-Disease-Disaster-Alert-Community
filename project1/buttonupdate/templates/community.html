@@ -13,7 +13,24 @@
         <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=oa0k1d1gao"></script>
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <style>
+            .card {
+                border: none !important; /* Bootstrap의 기본 테두리 제거 */
+                border-radius: 15px !important;
+                box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); /* 그림자 추가 */
+                transition: 0.3s; /* 그림자 효과의 변화 속도 조정 */
+                background-color: #fff; /* 배경색을 흰색으로 설정 */
+                margin: 15px
+            }
 
+            .card:hover {
+                box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 12px 40px 0 rgba(0, 0, 0, 0.19); /* 마우스 오버 시 그림자 효과 강화 */
+            }
+
+            .card-body {
+                padding: 1em; /* 카드 내부 패딩 조정 */
+            }
+        </style>
     </head>
     <body>
         <div class="d-flex" id="wrapper">
@@ -52,38 +69,41 @@
                     </div>
                 </nav>
                 <!-- Page content-->
-                <div class="container-fluid">
+                <div class="container">
 
                         
                     <div class="d-flex justify-content-end">
                         <a href="{{ url_for('create_post') }}" class="btn btn-primary mb-3">글쓰기</a>
                     </div>
-                    
-                    {% for post in posts %}
-                        <a href="{{ url_for('post_detail', post_id=post.id) }}" class="text-decoration-none text-dark">
-                            <div class="card mb-2">
-                                <div class="row no-gutters">
-                                    <div class="col-2">
-                                        <div class="card-body border-right text-center">
-                                            <p class="my-auto">{{ post.topic }}</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-10">
-                                        <div class="card-body">
-                                            <div class="row">
-                                                <div class="col">
-                                                    <h5 class="card-title">{{ post.title }}</h5>
+                    <div class="row">
+                        <div class="col-md-16">
+                            {% for post in posts %}
+                                <a href="{{ url_for('post_detail', post_id=post.id) }}" class="text-decoration-none text-dark">
+                                    <div class="card">
+                                        <div class="row no-gutters">
+                                            <div class="col-2">
+                                                <div class="card-body border-right text-center">
+                                                    <p class="my-auto">{{ post.topic }}</p>
                                                 </div>
-                                                <div class="col text-right">
-                                                    <small class="text-muted">{{ post.author }} | {{ post.timestamp.strftime('%Y-%m-%d %H:%M') }}</small>
+                                            </div>
+                                            <div class="col-10">
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col">
+                                                            <h5 class="card-title">{{ post.title }}</h5>
+                                                        </div>
+                                                        <div class="col text-right">
+                                                            <small class="text-muted">{{ post.author }} | {{ post.timestamp.strftime('%Y-%m-%d %H:%M') }}</small>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        </a>
-                    {% endfor %}
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
                     
                     <div class="d-flex justify-content-center mt-3">
                         <ul class="pagination">

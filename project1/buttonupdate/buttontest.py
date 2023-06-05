@@ -470,7 +470,6 @@ def quiz_start():
 def quiz_result():
     return render_template('result.html')
 
-
 # 애플리케이션 실행
 if __name__ == "__main__":
     os.chdir("project1/buttonupdate")

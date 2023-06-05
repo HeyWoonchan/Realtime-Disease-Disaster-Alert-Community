@@ -10,7 +10,33 @@
         <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='static/assets/favicon.ico') }}" />
         <!-- Core theme CSS (includes Bootstrap)-->
         <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet" />
+        <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=oa0k1d1gao"></script>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        
+        <style>
+            #map {
+                border-radius: 15px; /* 둥근 가장자리 추가 */
+                
+                
+            }
+            .card {
+                border: none !important; /* Bootstrap의 기본 테두리 제거 */
+                border-radius: 15px !important;
+                box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); /* 그림자 추가 */
+                transition: 0.3s; /* 그림자 효과의 변화 속도 조정 */
+                background-color: #fff; /* 배경색을 흰색으로 설정 */
+                margin: 15px
+            }
 
+            .card:hover {
+                box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 12px 40px 0 rgba(0, 0, 0, 0.19); /* 마우스 오버 시 그림자 효과 강화 */
+            }
+
+            .card-body {
+                padding: 1em; /* 카드 내부 패딩 조정 */
+            }
+        </style>
     </head>
     <body>
         <div class="d-flex" id="wrapper">
@@ -18,11 +44,10 @@
             <div class="border-end bg-white" id="sidebar-wrapper">
                 <div class="sidebar-heading border-bottom bg-light">Start Bootstrap</div>
                 <div class="list-group list-group-flush">
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!">국내</a>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!">해외</a>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!">커뮤니티</a>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!">재난 속에서 살아남기</a>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!">나라면 어떻게?</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!" onclick="location.href='/'">국내</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!" onclick="location.href='/external'">해외</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!" onclick="location.href='/community'">커뮤니티</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!" onclick="location.href='/quiz'">퀴즈</a>
                 </div>
             </div>
             <!-- Page content wrapper-->
@@ -52,50 +77,90 @@
                 <!-- Page content-->
                 <div class="container-fluid">
                     <h1 class="mt-4">국내 정보</h1>
-                    <br>
-                    <p>연합뉴스속보</p>
-                    <div id="newsArea"></div>
-                    <button id="newsButton">불러오기</button>
                     <hr>
-                    <p>네이버뉴스 속보 검색결과</p>
-                    <div id="newsnaverArea"></div>
-                    <button id="newsnaverButton">불러오기</button>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-sm-12 col-md-6">
+                                <div class="card" style="height:800px;">
+                                  <div id="map" class="card-body">
+                                    <!-- Map will be placed here. -->
+                                  </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">댓글 목록</h5>
+                                        {% for comment in comments %}
+                                        <li>{{ comment[1] }}: {{ comment[2] }}</li>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-body">
+                                        <form method="POST" action="/">
+                                            <input type="text" name="name" placeholder="이름"><br>
+                                            <textarea name="comment" placeholder="댓글"></textarea><br>
+                                            <input type="submit" value="등록">
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12 col-md-6">
+                                <!-- 여기에 두 번째 요소의 내용을 넣습니다. -->
+                                {% for row in data_emerg %}
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">[ 긴급/재난 ] {{ row[1] }} {{ row[0] }}</h5>
+                                        <p class="card-text">{{ row[2] }}</p>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                                <hr>
+
+                                {% for row in data %}
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">[{% if row[3] == "missing" %}
+                                            실종
+                                        {% elif row[3] == "disaster" %}
+                                            재난
+                                        {% elif row[3] == "emergency" %}
+                                            긴급
+                                        {% else %}
+                                            {{ row[3] }}
+                                        {% endif %}] {{ row[1] }} {{ row[0] }}</h5>
+                                        <p class="card-text">{{ row[2] }}</p>
+                                    </div>
+                                    </div>
+                                {% endfor %}
+                                <hr>
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">연합뉴스속보</h5>
+                                        <p class="card-text">{{ yh_news | safe}}</p>
+                                        <h5 class="card-title">네이버뉴스 속보 검색결과</h5>
+                                        <p class="card-text">{{ nv_news }}</p>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">빈자리 채우기</h5>
+                                        <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec consequat ultrices tellus, ut lobortis nisi maximus at. Nulla facilisi. Sed ultrices eleifend metus ac vestibulum. Integer euismod sem vitae volutpat sagittis. Fusce id malesuada odio, sed interdum nisl. Maecenas varius ex eu mauris tempus, id feugiat erat gravida. Phasellus pellentesque, metus nec interdum aliquet, neque ex eleifend tortor, eget convallis lectus turpis non lorem. Vestibulum a lectus massa. Mauris sed risus non orci sollicitudin feugiat. Nullam bibendum hendrerit nunc ac tincidunt.</p>
+                                    </div>
+                                </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12 col-md-12">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <canvas id="myChart" style="width:100%;"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                      </div>
                     <hr>
-                    <p>api 재난문자</p>
-                    <div id="apimsgArea"></div>
-                    <button id="apimsgButton">업데이트</button>
-                    <hr>
-                    <p>api 재난문자 db 업데이트</p>
-                    <div id="apimsgArea_db"></div>
-                    <button id="apimsgButton_db">업데이트</button>
-                    <hr>
-                    <table>
-                        <tr>
-                            <th>time</th>
-                            <th>location</th>
-                            <th>msg</th>
-                        </tr>
-                        {% for row in data %}
-                        <tr>
-                            <td>{{ row[0] }}</td>
-                            <td>{{ row[1] }}</td>
-                            <td>{{ row[2] }}</td>
-                        </tr>
-                        {% endfor %}
-                    </table>
-                    <br><br><br>
-                    <form method="POST" action="/home">
-                        <input type="text" name="name" placeholder="이름"><br>
-                        <textarea name="comment" placeholder="댓글"></textarea><br>
-                        <input type="submit" value="등록">
-                    </form>
-                    <br>
-                    <h2>이전 댓글</h2>
-                    <ul>
-                        {% for comment in comments %}
-                        <li>{{ comment[1] }}: {{ comment[2] }}</li>
-                        {% endfor %}
-                    </ul>
+                    
                 </div>
             </div>
         </div>
@@ -107,5 +172,61 @@
         <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 
         <script src="{{ url_for('static', filename='js/button_update.js') }}"></script>
+
+        <script src="{{ url_for('static', filename='js/maps_in.js') }}"></script>
+
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnp17nNrPOjhrQk4Pp7HUVfMGzyqGw5eI&callback=initMap" async defer > </script>
+        <script>
+            var chartData = {{ chart_data|tojson }}; // 오류 아님
+            var dates = {{ dates|tojson }};
+
+            var types = Object.keys(chartData[dates[0]]);
+
+            var datasets = [];
+            types.forEach(function(type) {
+                var data = [];
+                dates.forEach(function(date) {
+                    data.push(chartData[date][type]);
+                });
+
+                var dataset = {
+                    label: type,
+                    data: data,
+                    backgroundColor: getRandomColor()
+                };
+                datasets.push(dataset);
+            });
+
+            var ctx = document.getElementById('myChart').getContext('2d');
+            var myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: dates,
+                    datasets: datasets
+                },
+                options: {
+                    scales: {
+                        x: {
+                            stacked: true
+                        },
+                        y: {
+                            stacked: true
+                        }
+                    }
+                }
+            });
+
+            function getRandomColor() {
+                var letters = '0123456789ABCDEF';
+                var color = '#';
+                for (var i = 0; i < 6; i++) {
+                    color += letters[Math.floor(Math.random() * 16)];
+                }
+                return color;
+            }
+            window.addEventListener('resize', () => {
+                myChart.resize();
+            });    
+        </script>
     </body>
 </html>

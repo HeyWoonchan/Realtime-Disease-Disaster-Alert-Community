@@ -59,6 +59,7 @@ def get_msg_db():
     conn.close()
     return data
 
+#재난문자 db에서 긴급문자만 불러오기
 def get_msg_db_emerg():
     conn = sqlite3.connect(DB_internal_msg)
     cursor = conn.cursor()
@@ -68,6 +69,18 @@ def get_msg_db_emerg():
     cursor.close()
     conn.close()
     return data
+
+#해외안전정보 불러오기
+def get_db_safetrip():
+    conn = sqlite3.connect(DB_external_msg)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM ForSafeTrip ORDER BY id LIMIT 3")
+    data = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+    return data
+
 
 # 재난문자 데이터베이스 업데이트 함수
 def update_msg_db():
@@ -295,7 +308,11 @@ def external():
     if nowtime-last_execution_time_safetrip>60:
         last_execution_time_safetrip=nowtime
         update_safetrip()
-    return render_template('external.html')
+
+    data = get_db_safetrip()
+
+
+    return render_template('external.html', data = data)
 
 
 # 재난 메시지 업데이트를 위한 함수
@@ -354,18 +371,24 @@ def update_marker_in():
 def update_marker_ex():
     con = sqlite3.connect(DB_external_msg, isolation_level=None)
     cursor = con.cursor()
-    cursor.execute('select * from ForSafeTrip order by id asc limit 1')
-    gotdata = cursor.fetchone()
-    where = gotdata[1]
-    what = gotdata[2]
-    link = gotdata[3]
+    cursor.execute('select * from ForSafeTrip order by id asc limit 3')
+    gotdata = cursor.fetchall()
     api_key = 'AIzaSyCnp17nNrPOjhrQk4Pp7HUVfMGzyqGw5eI'
     maps = googlemaps.Client(key=api_key)
-    results = maps.geocode(where)
-    for result in results:
-        address = result['geometry']['location']
-        print(address['lat'], address['lng'], what)
-        return jsonify({'latitude' : address['lat'], 'longitude': address['lng'], 'what' : what, "link":link})
+
+    marker_data = []
+    for row in gotdata:
+        where = row[1]
+        what = row[2]
+        link = row[3]
+        results = maps.geocode(where)
+
+        for result in results:
+            address = result['geometry']['location']
+            print(address['lat'], address['lng'], what)
+            marker_data.append({'latitude' : address['lat'], 'longitude': address['lng'], 'what' : what, 'link':link})
+    
+    return jsonify(marker_data)
     
 @app.route('/update_WHOnews')
 def update_WHOnews():
@@ -471,6 +494,21 @@ def quiz_start():
 def quiz_result():
     return render_template('result.html')
 
+#퀴즈 페이지 코드--------------------------------------------------
+@app.route('/quiz')
+def quiz():
+    return render_template('quiz.html')
+
+@app.route('/quiz/start')
+def quiz_start():
+    return render_template('quizstart.html')
+
+@app.route('/quiz/start/submit')
+def quiz_result():
+    return render_template('result.html')
+
+
+# 애플리케이션 실행
 
 # 애플리케이션 실행
 if __name__ == "__main__":

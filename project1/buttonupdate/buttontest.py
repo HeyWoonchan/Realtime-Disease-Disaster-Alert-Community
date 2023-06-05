@@ -324,7 +324,8 @@ def get_disaster_messages():
 def update_news():
     response = requests.get(url_news)
     soup = BeautifulSoup(response.content, 'html.parser')
-    new_content = soup.find_all('a', class_='tit-wrap')[0]
+    new_content = "연합뉴스 부분"  #soup.find_all('a', class_='tit-wrap')[0]
+    
     print(new_content)
     return new_content
 

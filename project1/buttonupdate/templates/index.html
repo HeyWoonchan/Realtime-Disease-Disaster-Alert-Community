@@ -13,30 +13,7 @@
         <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=oa0k1d1gao"></script>
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        
-        <style>
-            #map {
-                border-radius: 15px; /* 둥근 가장자리 추가 */
-                
-                
-            }
-            .card {
-                border: none !important; /* Bootstrap의 기본 테두리 제거 */
-                border-radius: 15px !important;
-                box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); /* 그림자 추가 */
-                transition: 0.3s; /* 그림자 효과의 변화 속도 조정 */
-                background-color: #fff; /* 배경색을 흰색으로 설정 */
-                margin: 15px
-            }
-
-            .card:hover {
-                box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 12px 40px 0 rgba(0, 0, 0, 0.19); /* 마우스 오버 시 그림자 효과 강화 */
-            }
-
-            .card-body {
-                padding: 1em; /* 카드 내부 패딩 조정 */
-            }
-        </style>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style_custom.css') }}">
     </head>
     <body>
         <div class="d-flex" id="wrapper">
@@ -117,19 +94,22 @@
                                 <hr>
 
                                 {% for row in data %}
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h5 class="card-title">[{% if row[3] == "missing" %}
-                                            실종
-                                        {% elif row[3] == "disaster" %}
-                                            재난
-                                        {% elif row[3] == "emergency" %}
-                                            긴급
-                                        {% else %}
-                                            {{ row[3] }}
-                                        {% endif %}] {{ row[1] }} {{ row[0] }}</h5>
-                                        <p class="card-text">{{ row[2] }}</p>
-                                    </div>
+                                    <div class="card" id="1" onclick="moveToLocation(this.id)">
+                                        <div class="card-body">
+                                            <h5 class="card-title">
+                                                {% if row[3] == "missing" %}
+                                                    실종
+                                                {% elif row[3] == "disaster" %}
+                                                    재난
+                                                {% elif row[3] == "emergency" %}
+                                                    긴급
+                                                {% else %}
+                                                    {{ row[3] }}
+                                                {% endif %}
+                                                {{ row[1] }} {{ row[0] }}
+                                            </h5>
+                                            <p class="card-text">{{ row[2] }}</p>
+                                        </div>
                                     </div>
                                 {% endfor %}
                                 <hr>
@@ -139,6 +119,28 @@
                                         <p class="card-text">{{ yh_news | safe}}</p>
                                         <h5 class="card-title">네이버뉴스 속보 검색결과</h5>
                                         <p class="card-text">{{ nv_news }}</p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <a href="/external" class="text-decoration-none text-dark">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <h5 class="card-title">해외정보 페이지</h5>
+                                                    <p class="card-text">클릭하시면 해외정보 페이지로 넘어갑니다.</p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <div class="col-6">
+                                        <a href="/community" class="text-decoration-none text-dark">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <h5 class="card-title">커뮤니티 페이지</h5>
+                                                    <p class="card-text">클릭하시면 커뮤니티 페이지로 넘어갑니다.</p>
+                                                </div>
+                                            </div>
+                                        </a>
                                     </div>
                                 </div>
                                 <div class="card">

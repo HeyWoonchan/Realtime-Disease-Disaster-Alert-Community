@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, jsonify, url_for, flash
-import requests, json, sqlite3, pytz, os, googlemaps, time
+import requests, json, sqlite3, pytz, os, googlemaps, time, random
 from bs4 import BeautifulSoup
 from datetime import datetime
 from urllib.parse import urljoin
@@ -458,17 +458,43 @@ def comment_post(post_id):
     return render_template('comment_post.html', title='New Comment', form=form)
 
 #퀴즈 페이지 코드--------------------------------------------------
+
+def get_random_quiz():
+    connection = sqlite3.connect('quiz.db')
+    cursor = connection.cursor()
+    cursor.execute('SELECT content FROM quiz')
+
+    all_quizzes = cursor.fetchall()
+    num_quizzes = len(all_quizzes)
+
+    random_quizzes = []
+    for _ in range(10):
+        random_index = random.randint(0, num_quizzes - 1)
+        random_quizz = all_quizzes[random_index][0]  # content 값을 가져옴
+        random_quizzes.append(random_quizz)
+
+    connection.close()
+    return random_quizzes
+
+
 @app.route('/quiz')
 def quiz():
     return render_template('quiz.html')
 
 @app.route('/quiz/start')
 def quiz_start():
-    return render_template('quizstart.html')
+    quizzes = get_random_quiz()
+    return render_template('quizstart.html',quizzes=quizzes)
+
 
 @app.route('/quiz/start/submit')
 def quiz_result():
     return render_template('result.html')
+
+@app.route('/quiz/start/submit/result/restart')
+def quiz_restart():
+    return redirect('/quiz')
+
 
 # 애플리케이션 실행
 if __name__ == "__main__":
@@ -476,4 +502,4 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
     create_table()
-    app.run(host='localhost', port=8000)
+    app.run(host='localhost', port=9000)

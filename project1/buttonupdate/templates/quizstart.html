@@ -59,6 +59,7 @@
         .button {
             background-color: lightskyblue;
             margin-top: 20px;
+            margin-bottom : 20px;
             border-radius: 15px;
             padding: 10px 20px;
             border: none;
@@ -124,78 +125,17 @@
                 <div class="game">
                     
                     <div class="title">다음 재난 상황별 행동 요령 질문에 답하고, 쿠민이를 재난에서 구해주세요!</div>
+                    {% for quiz in quizzes %}
                     <div class="quiz">
-                        <div class="quiz-question">문제1</div> &nbsp;&nbsp;
+                        <div class="quiz-question">{{ quiz[0] }}</div>
                         <div class="quiz-buttons">
-                            <button class="btn btn-primary true-button">참</button> &nbsp;
+                            <button class="btn btn-primary true-button">참</button>
                             <button class="btn btn-primary false-button">거짓</button>
                         </div>
                     </div>
-                    <div class="quiz">
-                        <div class="quiz-question">문제2</div>&nbsp;&nbsp;
-                        <div class="quiz-buttons">
-                            <button class="btn btn-primary true-button">참</button>&nbsp;
-                            <button class="btn btn-primary false-button">거짓</button>
-                        </div>
-                    </div>
-                    <div class="quiz">
-                        <div class="quiz-question">문제3</div>&nbsp;&nbsp;
-                        <div class="quiz-buttons">
-                            <button class="btn btn-primary true-button">참</button> &nbsp;
-                            <button class="btn btn-primary false-button">거짓</button>
-                        </div>
-                    </div>
-                    <div class="quiz">
-                        <div class="quiz-question">문제4</div>&nbsp;&nbsp;
-                        <div class="quiz-buttons">
-                            <button class="btn btn-primary true-button">참</button>&nbsp;
-                            <button class="btn btn-primary false-button">거짓</button>
-                        </div>
-                    </div>
-                    <div class="quiz">
-                        <div class="quiz-question">문제5</div>&nbsp;&nbsp;
-                        <div class="quiz-buttons">
-                            <button class="btn btn-primary true-button">참</button> &nbsp;
-                            <button class="btn btn-primary false-button">거짓</button>
-                        </div>
-                    </div>
-                    <div class="quiz">
-                        <div class="quiz-question">문제6</div>&nbsp;&nbsp;
-                        <div class="quiz-buttons">
-                            <button class="btn btn-primary true-button">참</button>&nbsp;
-                            <button class="btn btn-primary false-button">거짓</button>
-                        </div>
-                    </div>
-                    <div class="quiz">
-                        <div class="quiz-question">문제7</div>&nbsp;&nbsp;
-                        <div class="quiz-buttons">
-                            <button class="btn btn-primary true-button">참</button> &nbsp;
-                            <button class="btn btn-primary false-button">거짓</button>
-                        </div>
-                    </div>
-                    <div class="quiz">
-                        <div class="quiz-question">문제8</div>&nbsp;&nbsp;
-                        <div class="quiz-buttons">
-                            <button class="btn btn-primary true-button">참</button>&nbsp;
-                            <button class="btn btn-primary false-button">거짓</button>
-                        </div>
-                    </div>
-                    <div class="quiz">
-                        <div class="quiz-question">문제9</div>&nbsp;&nbsp;
-                        <div class="quiz-buttons">
-                            <button class="btn btn-primary true-button">참</button>&nbsp;
-                            <button class="btn btn-primary false-button">거짓</button>
-                        </div>
-                    </div>
-                    <div class="quiz">
-                        <div class="quiz-question">문제10</div>&nbsp;&nbsp;
-                        <div class="quiz-buttons">
-                            <button class="btn btn-primary true-button">참</button>&nbsp;
-                            <button class="btn btn-primary false-button">거짓</button>
-                        </div>
-                    </div>
-                    <button id="submit-button" class="button">제출하기</button>
+                    {% endfor %}
                 </div>
+                <button id="submit-button" class="button">제출하기</button>
             </div>
         </div>
     </div>

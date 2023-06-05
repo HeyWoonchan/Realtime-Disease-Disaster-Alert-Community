@@ -494,22 +494,6 @@ def quiz_start():
 def quiz_result():
     return render_template('result.html')
 
-#퀴즈 페이지 코드--------------------------------------------------
-@app.route('/quiz')
-def quiz():
-    return render_template('quiz.html')
-
-@app.route('/quiz/start')
-def quiz_start():
-    return render_template('quizstart.html')
-
-@app.route('/quiz/start/submit')
-def quiz_result():
-    return render_template('result.html')
-
-
-# 애플리케이션 실행
-
 # 애플리케이션 실행
 if __name__ == "__main__":
     os.chdir("project1/buttonupdate")

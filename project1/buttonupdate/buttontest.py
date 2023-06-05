@@ -8,6 +8,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, SubmitField, SelectField
 from wtforms.validators import DataRequired 
 
+
 # 데이터베이스 파일 이름
 DB_comment = 'comments.db'
 DB_news = 'news.db'
@@ -157,12 +158,12 @@ def create_table():
 
 
 
-
 url_news = "https://www.yna.co.kr/theme/breaknews-history"
 url_api = "http://apis.data.go.kr/1741000/DisasterMsg3/getDisasterMsg1List?serviceKey=DCEWLmC5o0ec6lJ%2FsTpRPUFLDnn8eH24STfRT5ZxbqR9BQBOk0i484ELM%2BBMVgC3YDKc8SiGrtkcs17Skrp97A%3D%3D&pageNo=1&numOfRows=20&type=json"
 url_navernews = 'https://search.naver.com/search.naver?where=news&query=%EB%89%B4%EC%8A%A4%20%EC%86%8D%EB%B3%B4&sort=1&sm=tab_smr&nso=so:dd,p:all,a:all'
 url_safetrip = "https://www.0404.go.kr/dev/newest_list.mofa"
 url_safetrip_view = "https://www.0404.go.kr/dev/newest_view.mofa"
+url_navernewsapi = "https://openapi.naver.com/v1/search/news.json"
 app = Flask(__name__)
 
 
@@ -230,6 +231,89 @@ def update_safetrip():
     # 변경사항 저장
     conn.commit()
     conn.close()
+
+    #navernewsapi로 news db 생성
+def newsapi_dbsave() :
+    API_KEY = "Gr03tHUOlcbECB9wsRtS"
+    API_SECRET = "M3sjGHRdM_"
+
+    conn = sqlite3.connect("news.db")
+    cursor = conn.cursor()
+
+    news_keywords = [
+        "[속보] 풍수해",
+        "[속보] 산사태",
+        "[속보] 폭염",
+        "[속보] 호우",
+        "[속보] 지진",
+        "[속보] 태풍",
+        "[속보] 화재",
+        "[속보] 산불",
+        "[속보] 산사태",
+        "[속보] 감염병",
+        "[속보] 정전",
+        "[속보] 경계경보",
+        "[속보] 공습경보",
+        "[속보] 사고"
+    ]
+
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS news (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        pub_date TEXT,
+        title TEXT,
+        link TEXT,
+        disaster TEXT,
+        UNIQUE(title, link) ON CONFLICT IGNORE
+    )
+    ''')
+
+    news_list = []
+    
+    for keyword in news_keywords:
+        query = keyword
+        headers = {
+            "X-Naver-Client-Id": API_KEY,
+            "X-Naver-Client-Secret": API_SECRET
+        }
+        params = {
+            "query": query,
+            "display": 30  # 가져올 뉴스 개수
+        }
+        response = requests.get(url_navernewsapi, headers=headers, params=params)
+        data = response.json()
+
+        replace_chars = {
+            "<b>": "",
+            "</b>": "",
+            "&lt;": "<",
+            "&gt;": ">",
+            "&nbsp;": " ",
+            "&amp;": "&",
+            "&quot;": "\"",
+            "&#035;": "#",
+            "&apos": "\'"
+        }
+
+        for item in data['items']:
+            title = item['title']
+            for char, replacement in replace_chars.items():
+                title = title.replace(char, replacement)
+            link = item['originallink']
+            date = item['pubDate']
+            parsed_date = datetime.strptime(date, "%a, %d %b %Y %H:%M:%S %z")  # 날짜 문자열을 파싱하여 datetime 객체로 변환
+            pub_date = parsed_date.strftime("%Y-%m-%d %H:%M:%S")  # 원하는 형식으로 날짜 포맷팅
+
+            news_list.append((pub_date, title, link, keyword[5:]))
+
+    news_list.sort(reverse=True)
+    cursor.executemany("INSERT INTO news (pub_date, title, link, disaster) VALUES (?, ?, ?, ?)", news_list)
+
+    conn.commit()
+    conn.close()
+
+    print("naver news api로 db 생성 완료")
+
 
 #커뮤니티 페이지용
 app.config['SECRET_KEY'] = 'mysecretkey1232'
@@ -400,6 +484,32 @@ def update_WHOnews():
     print(link)
     return jsonify({'link' : link})
 
+#뉴스 페이지
+@app.route('/newspage')
+def news():
+    newsapi_dbsave()
+    global last_execution_time_safetrip
+    nowtime = time.time()
+    if nowtime-last_execution_time_safetrip>60:
+        last_execution_time_safetrip=nowtime
+        update_news_naver()
+
+    conn = sqlite3.connect('news.db')
+    cursor = conn.cursor()
+
+    # 데이터베이스에서 제목과 링크 조회
+    query = "SELECT id, title, link, disaster, pub_date FROM news ORDER BY pub_date DESC"
+    cursor.execute(query)
+    rows = cursor.fetchall()
+
+    data = []
+    for row in rows:
+        pub_date_str = row[4]  # pub_date를 문자열로 가져옴
+        pub_date = datetime.strptime(pub_date_str, "%Y%m%d%H%M%S")  # 문자열을 datetime 객체로 변환
+        formatted_pub_date = pub_date.strftime("%Y-%m-%d %H:%M:%S")  # 원하는 형식으로 날짜 포맷팅
+        data.append({'id': row[0], 'title': row[1], 'link': row[2], 'disaster': row[3], 'pub_date': formatted_pub_date})
+    return render_template('newspage.html', data=data)
+
 
 #커뮤니티 페이지 전용 ----------------
 
@@ -496,7 +606,7 @@ def quiz_result():
 
 # 애플리케이션 실행
 if __name__ == "__main__":
-    os.chdir("project1/buttonupdate")
+    # os.chdir("project1/buttonupdate")
     with app.app_context():
         db.create_all()
     create_table()

@@ -14,6 +14,7 @@ DB_news = 'news.db'
 DB_internal_msg = 'database.db'
 DB_external_msg = 'ForSafeTrip.db'
 DB_WHOnews = 'ExternalNews.db'
+DB_quiz = 'quiz.db'
 
 last_execution_time = 0
 last_execution_time_safetrip = 0
@@ -58,22 +59,10 @@ def get_msg_db():
     conn.close()
     return data
 
-#재난문자 db에서 긴급문자만 불러오기
 def get_msg_db_emerg():
     conn = sqlite3.connect(DB_internal_msg)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM my_table WHERE type IN ('disaster', 'emergency') ORDER BY create_date DESC LIMIT 3")
-    data = cursor.fetchall()
-
-    cursor.close()
-    conn.close()
-    return data
-
-#해외안전정보 불러오기
-def get_db_safetrip():
-    conn = sqlite3.connect(DB_external_msg)
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM ForSafeTrip ORDER BY id LIMIT 3")
     data = cursor.fetchall()
 
     cursor.close()
@@ -306,11 +295,7 @@ def external():
     if nowtime-last_execution_time_safetrip>60:
         last_execution_time_safetrip=nowtime
         update_safetrip()
-
-    data = get_db_safetrip()
-
-
-    return render_template('external.html', data = data)
+    return render_template('external.html')
 
 
 # 재난 메시지 업데이트를 위한 함수
@@ -354,7 +339,6 @@ def update_marker_in():
     for row in gotdata:
         where = row[1]
         what = row[2]
-        
         results = maps.geocode(where)
 
         for result in results:
@@ -370,24 +354,18 @@ def update_marker_in():
 def update_marker_ex():
     con = sqlite3.connect(DB_external_msg, isolation_level=None)
     cursor = con.cursor()
-    cursor.execute('select * from ForSafeTrip order by id asc limit 3')
-    gotdata = cursor.fetchall()
+    cursor.execute('select * from ForSafeTrip order by id asc limit 1')
+    gotdata = cursor.fetchone()
+    where = gotdata[1]
+    what = gotdata[2]
+    link = gotdata[3]
     api_key = 'AIzaSyCnp17nNrPOjhrQk4Pp7HUVfMGzyqGw5eI'
     maps = googlemaps.Client(key=api_key)
-
-    marker_data = []
-    for row in gotdata:
-        where = row[1]
-        what = row[2]
-        link = row[3]
-        results = maps.geocode(where)
-
-        for result in results:
-            address = result['geometry']['location']
-            print(address['lat'], address['lng'], what)
-            marker_data.append({'latitude' : address['lat'], 'longitude': address['lng'], 'what' : what, 'link':link})
-    
-    return jsonify(marker_data)
+    results = maps.geocode(where)
+    for result in results:
+        address = result['geometry']['location']
+        print(address['lat'], address['lng'], what)
+        return jsonify({'latitude' : address['lat'], 'longitude': address['lng'], 'what' : what, "link":link})
     
 @app.route('/update_WHOnews')
 def update_WHOnews():
@@ -480,10 +458,24 @@ def comment_post(post_id):
         return redirect(url_for('post_detail', post_id=post_id))
     return render_template('comment_post.html', title='New Comment', form=form)
 
+#퀴즈 페이지 코드--------------------------------------------------
+@app.route('/quiz')
+def quiz():
+    return render_template('quiz.html')
 
+@app.route('/quiz/start')
+def quiz_start():
+    return render_template('quizstart.html')
+
+@app.route('/quiz/start/submit')
+def quiz_result():
+    return render_template('result.html')
+
+
+# 애플리케이션 실행
 if __name__ == "__main__":
     os.chdir("project1/buttonupdate")
     with app.app_context():
         db.create_all()
     create_table()
-    app.run(host='localhost', port=8023)
+    app.run(host='localhost', port=8000)

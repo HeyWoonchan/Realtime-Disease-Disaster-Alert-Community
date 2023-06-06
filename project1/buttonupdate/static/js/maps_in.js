@@ -1,3 +1,5 @@
+var locations = {};
+
 function initMap() {
     // Google Maps 지도 인스턴스 생성 (기본 위치는 임의로 설정합니다. 이후에 수정될 것입니다.)
     var map = new google.maps.Map(document.getElementById('map'), {
@@ -18,27 +20,37 @@ function initMap() {
         data.forEach((marker, index) => {
             var position = {lat: marker.latitude, lng: marker.longitude};
             var title = marker.what;
-
+        
+            // 위치 정보를 locations 객체에 저장합니다.
+            locations[index] = position;
+        
             // 마커를 생성합니다.
             var newMarker = new google.maps.Marker({
                 position: position,
                 map: map,
                 title: title
             });
-
+        
             // 마커를 클릭하면 팝업창으로 'what' 정보를 표시합니다.
             var infowindow = new google.maps.InfoWindow({
                 content: title
             });
-
+        
             newMarker.addListener('click', function() {
                 infowindow.open(map, newMarker);
             });
-
+        
             // 첫 번째 마커의 경우, 정보 창을 바로 엽니다.
             if (index === 0) {
                 infowindow.open(map, newMarker);
             }
         });
     });
+}
+
+function moveToLocation(id) {
+    var location = locations[id];
+    if (location) {
+        map.setCenter(location);
+    }
 }

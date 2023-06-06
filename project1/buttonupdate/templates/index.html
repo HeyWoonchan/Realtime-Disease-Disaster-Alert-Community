@@ -87,7 +87,14 @@
                                 {% for row in data_emerg %}
                                 <div class="card">
                                     <div class="card-body">
-                                        <h5 class="card-title">[ 긴급/재난 ] {{ row[1] }} {{ row[0] }}</h5>
+                                        <div class="d-flex justify-content-between">
+                                            <h5 class="card-title">
+                                                <span class="text-danger">[ 긴급/재난 ]</span> {{ row[1] }}
+                                            </h5>
+                                            <h5 class="card-title">
+                                                <span>{{ row[0] }}</span>
+                                            </h5>
+                                        </div>
                                         <p class="card-text">{{ row[2] }}</p>
                                     </div>
                                 </div>
@@ -97,18 +104,23 @@
                                 {% for row in data %}
                                     <div class="card" id="1" onclick="moveToLocation(this.id)">
                                         <div class="card-body">
-                                            <h5 class="card-title">
-                                                {% if row[3] == "missing" %}
-                                                    실종
-                                                {% elif row[3] == "disaster" %}
-                                                    재난
-                                                {% elif row[3] == "emergency" %}
-                                                    긴급
-                                                {% else %}
-                                                    {{ row[3] }}
-                                                {% endif %}
-                                                {{ row[1] }} {{ row[0] }}
-                                            </h5>
+                                            <div class="d-flex justify-content-between">
+                                                <h5 class="card-title">[
+                                                    {% if row[3] == "missing" %}
+                                                        실종
+                                                    {% elif row[3] == "disaster" %}
+                                                        재난
+                                                    {% elif row[3] == "emergency" %}
+                                                        긴급
+                                                    {% else %}
+                                                        {{ row[3] }}
+                                                    {% endif %}
+                                                    ] {{ row[1] }} 
+                                                </h5>
+                                                <h5 class="card-title">
+                                                    <span>{{ row[0] }}</span>
+                                                </h5>
+                                            </div>
                                             <p class="card-text">{{ row[2] }}</p>
                                         </div>
                                     </div>

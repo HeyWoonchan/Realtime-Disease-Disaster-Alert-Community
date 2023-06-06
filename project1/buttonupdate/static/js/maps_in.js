@@ -54,3 +54,17 @@ function moveToLocation(id) {
         map.setCenter(location);
     }
 }
+
+document.getElementById("toggle-button").addEventListener("click", function() {
+    var sidebar = document.getElementById("sidebar-popup");
+    var button = document.getElementById("toggle-button");
+    var rect = button.getBoundingClientRect();
+    sidebar.style.top = rect.bottom + "px";
+    sidebar.style.left = rect.left + "px";
+    
+    if (sidebar.classList.contains("hidden")) {
+        sidebar.classList.remove("hidden");
+    } else {
+        sidebar.classList.add("hidden");
+    }
+});

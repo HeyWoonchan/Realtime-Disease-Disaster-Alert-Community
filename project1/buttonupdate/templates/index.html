@@ -7,13 +7,30 @@
         <meta name="author" content="" />
         <title>질병 및 재난 알리미</title>
         <!-- Favicon-->
-        <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='static/assets/favicon.ico') }}" />
+        <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='assets/favicon.ico') }}" />
         <!-- Core theme CSS (includes Bootstrap)-->
         <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet" />
         <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=oa0k1d1gao"></script>
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <link rel="stylesheet" href="{{ url_for('static', filename='css/style_custom.css') }}">
+        <style>
+            #sidebar-popup {
+            position: absolute;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            z-index: 9999;
+        }
+
+        #sidebar-popup.hidden {
+            display: none;
+        }
+
+
+
+        </style>
     </head>
     <body>
         <div class="d-flex" id="wrapper">
@@ -53,10 +70,42 @@
                     </div>
                 </nav>
                 <!-- Page content-->
+
+                
                 <div class="container-fluid">
-                    <h1 class="mt-4">국내 정보</h1>
-                    <hr>
+                    <button id="toggle-button">메뉴 열기</button>
+
+                    <div id="sidebar-popup" class="hidden">
+                        <div class="sidebar-heading border-bottom bg-light">Start Bootstrap</div>
+                        <div class="list-group list-group-flush">
+                            <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!" onclick="location.href='/'">국내</a>
+                            <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!" onclick="location.href='/newspage'">국내 재난 뉴스</a>
+                            <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!" onclick="location.href='/external'">해외</a>
+                            <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!" onclick="location.href='/community'">커뮤니티</a>
+                            <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!" onclick="location.href='/quiz'">퀴즈</a>
+                        </div>
+                    </div>
+                    
+                              
                     <div class="container">
+                        <div class="row">
+                            <div class="col-sm-12 col-md-12">
+                                <div class="card" style="height: 60px; margin: 60px;">
+                                <form action="https://search.naver.com/search.naver" method="get" class="card-body d-flex justify-content-between align-items-center" style="padding: 1px;">
+                                    <!-- 로고 이미지 -->
+                                    <div style="width: auto; height: 58px; display: flex; align-items: center; justify-content: center; margin: 1px;">
+                                    <img src="{{ url_for('static', filename='img/n_img.png') }}" alt="logo" style="width: 80%; height: auto;">
+                                    </div>
+                                    <!-- 검색어 입력 칸 -->
+                                    <input type="text" name="query" class="form-control mr-3" style="flex-grow: 1; border: none;" placeholder="Search...">
+                                    <!-- 검색 버튼 -->
+                                    <button type="submit" class="btn" style="width: 62px; height: 58px; padding: 0; display: flex; align-items: center; justify-content: center; margin: 1px;">
+                                    <img src="{{ url_for('static', filename='img/s_img.png') }}" alt="Search" style="max-width: 80%; height: auto;">
+                                    </button>
+                                </form>
+                                </div>
+                             </div>
+                        </div>
                         <div class="row">
                             <div class="col-sm-12 col-md-6">
                                 <div class="card" style="height:800px;">

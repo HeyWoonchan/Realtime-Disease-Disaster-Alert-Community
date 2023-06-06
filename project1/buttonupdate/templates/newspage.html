@@ -3,6 +3,7 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="description" content="" />
         <meta name="author" content="" />
         <title>질병 및 재난 알리미</title>
@@ -11,8 +12,52 @@
         <!-- Core theme CSS (includes Bootstrap)-->
         <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet" />
         <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=oa0k1d1gao"></script>
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script async
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnp17nNrPOjhrQk4Pp7HUVfMGzyqGw5eI&callback=initMap"> </script>
+        <style>
+            .card {
+                border: none;
+                /* border-color:#999999; */
+                border-radius: 3px !important;
+                background-color: #fff; /* 배경색을 흰색으로 설정 */
+                padding: 0.5rem 1rem;
+            }
+
+            .card:hover {
+                background-color: #d3d3d3;
+            }
+
+            /* 팝업 스타일 */
+            #popup {
+                display: none;
+                position: fixed;
+                width: 100%;
+                height: 100%;
+                top: 0;
+                left: 0;
+                z-index: 100;
+                background-color: rgba(0, 0, 0, 0.5); /* 뒷 배경을 반투명하게 만듭니다. */
+            }
+
+            /* 닫기 버튼 스타일 */
+            #close {
+                position: absolute;
+                right: 10px;
+                top: 10px;
+                cursor: pointer;
+                color: white; /* 닫기 버튼 색상을 흰색으로 만듭니다. */
+            }
+
+            /* iframe 스타일 */
+            #content {
+                position: relative;
+                width: 80%;
+                height: 80%;
+                top: 10%;
+                left: 10%;
+                background-color: white;
+            }
+        </style>
 
     </head>
     <body>
@@ -25,7 +70,7 @@
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/newspage">국내 재난 뉴스</a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/external">해외</a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/community">커뮤니티</a>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!">퀴즈</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/quiz">퀴즈</a>
                 </div>
             </div>
             <!-- Page content wrapper-->
@@ -54,53 +99,36 @@
                 </nav>
                 <!-- Page content-->
                 <div class="container-fluid">
-                    <div class="container mt-5">
-                        <div class="card">
-                            <div class="card-body">
-                                <h1 class="card-title">{{ post.title }}</h1>
-                                <h5 class="card-subtitle mb-2 text-muted">by {{ post.author }}</h5>
-                                <p class="card-text">{{ post.content }}</p>
-                                <p class="card-text"><small class="text-muted">{{ post.timestamp.strftime('%Y-%m-%d %H:%M') }}</small></p>
+                    <h1 class="mt-4">재난 관련 뉴스 모아보기</h1>
+                    <br>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-16">
+                                <div>
+                                    {% for item in data %}
+                                    <button onclick="openPopup('{{ item.link }}')" class="card">
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <div>
+                                                {{ item.id }} | {{ item.disaster }} | {{ item.title }}
+                                            </div>
+                                            <div class="col text-right">
+                                                {{ item.pub_date }}
+                                            </div>
+                                        </div>
+                                    </button>
+                                    <div id="popup">
+                                        <span id="close" onclick="closePopup()">닫기</span>
+                                        <div id="content">
+                                            <iframe id="originnews" src="" width="100%" height="100%"></iframe>
+                                        </div>
+                                    </div>
+                                    <hr width="1000px" color="#999999" noshade />
+                                    {% endfor %}
+                                    
+                                </div>
                             </div>
                         </div>
-                    
-                        <h2 class="mt-4">Comments</h2>
-                        {% for comment in post.comments %}
-                            <div class="card mt-3">
-                                <div class="card-body">
-                                    <h5 class="card-title">{{ comment.author }}</h5>
-                                    <p class="card-text">{{ comment.content }}</p>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    
-                        {% for comment in comments %}
-                            <div class="card mt-3">
-                                <div class="card-body">
-                                    <p class="card-text">{{ comment.content }}</p>
-                                    <h5 class="card-title">{{ comment.author }}</h5>
-                                    <p class="card-text"><small class="text-muted">{{ comment.timestamp.strftime('%Y-%m-%d %H:%M') }}</small></p>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    
-                        <form action="{{ url_for('comment_post', post_id=post.id) }}" method="post" class="mt-5">
-                            {{ form.hidden_tag() }}
-                            <div class="form-group">
-                                {{ form.author.label }}<br>
-                                {{ form.author(size=32, class="form-control") }}
-                            </div>
-                            <div class="form-group">
-                                {{ form.content.label }}<br>
-                                {{ form.content(size=32, class="form-control") }}
-                            </div>
-                            {{ form.submit(class="btn btn-primary") }}
-                        </form>
-                    
-                        <a href="{{ url_for('index') }}" class="btn btn-secondary mt-3">Back to list</a>
                     </div>
-                </div>
-            </div>
         </div>
         
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -108,6 +136,12 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
         <!-- Core theme JS-->
         <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+
+        <script src="{{ url_for('static', filename='js/button_update.js') }}"></script>
+        
+        <script src="{{ url_for('static', filename='js/news.js') }}"></script>
+
+        
 
     </body>
 </html>

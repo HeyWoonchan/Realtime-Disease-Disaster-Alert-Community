@@ -125,7 +125,7 @@
                             <div class="row">
                                 {% for item in data[:9] %}
                                 <div class="col-md-4">
-                                    <div class="card" style="width: 300px; height: 300px;">
+                                    <div class="card" onclick="openPopup('{{ item.link }}')" style="width: 300px; height: 300px;">
                                         <img src="{{ url_for('static', filename='img/쿠민.jpg') }}" class="card-img-top" style="height: 70%;">
                                         <div class="card-body" style="height: 30%;">
                                             <p class="card-text">{{ item.title }}</p>
@@ -149,7 +149,7 @@
                                     </thead>
                                     <tbody>
                                         {% for item in data %}
-                                            <tr>
+                                            <tr onclick="openPopup('{{ item.link }}')">
                                                 <td>{{ item.id }}</td>
                                                 <td>{{ item.disaster }}</td>
                                                 <td><strong>{{ item.title }}</strong></td>

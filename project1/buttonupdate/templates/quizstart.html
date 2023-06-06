@@ -47,13 +47,15 @@
         }
     
         .quiz-question {
+            margin-top : 5px;
             margin-bottom: 20px;
+            text-align : center;
         }
     
         .quiz-buttons {
             display: flex;
             gap: 10px;
-            margin-top: 10px;
+            margin-top: 5px;
         }
     
         .button {
@@ -74,6 +76,7 @@
         .false-button {
             background-color: skyblue;
             border : none;
+            margin-bottom : 5px;
         }
     </style>
 </head>
@@ -125,15 +128,76 @@
                 <div class="game">
                     
                     <div class="title">다음 재난 상황별 행동 요령 질문에 답하고, 쿠민이를 재난에서 구해주세요!</div>
-                    {% for quiz in quizzes %}
                     <div class="quiz">
-                        <div class="quiz-question">{{ quiz[0] }}</div>
+                        <div class="quiz-question">Q1. [자연재난 : 대설] 차량 운행 시에는 고속 운행을 통해 눈이 쌓인 구간을 재빨리 벗어난다. </div>
                         <div class="quiz-buttons">
-                            <button class="btn btn-primary true-button">참</button>
+                            <button class="btn btn-primary true-button">참</button> &nbsp;
                             <button class="btn btn-primary false-button">거짓</button>
                         </div>
                     </div>
-                    {% endfor %}
+                    <div class="quiz">
+                        <div class="quiz-question">Q2. [사회재난 : 화재] 손등으로 출입문 손잡이를 만져보아 손잡이가 따뜻하거나 뜨거우면 문 반대쪽에 불이 난 것이므로 문을 열지 않는다.</div>
+                        <div class="quiz-buttons">
+                            <button class="btn btn-primary true-button">참</button>&nbsp;
+                            <button class="btn btn-primary false-button">거짓</button>
+                        </div>
+                    </div>
+                    <div class="quiz">
+                        <div class="quiz-question">Q3. [자연재난 : 황사∙미세먼지] 황사∙미세먼지가 진행되는 중에는 충분히 환기를 하고 청소를 합니다.</div>
+                        <div class="quiz-buttons">
+                            <button class="btn btn-primary true-button">참</button> &nbsp;
+                            <button class="btn btn-primary false-button">거짓</button>
+                        </div>
+                    </div>
+                    <div class="quiz">
+                        <div class="quiz-question">Q4. [사회재난 : 화학물질사고] 화학사고로 발생한 독성 가스는 대부분 공기보다 가볍기 때문에 실외에 있는 경우 낮은 곳으로 대피해야 한다.</div>
+                        <div class="quiz-buttons">
+                            <button class="btn btn-primary true-button">참</button>&nbsp;
+                            <button class="btn btn-primary false-button">거짓</button>
+                        </div>
+                    </div>
+                    <div class="quiz">
+                        <div class="quiz-question">Q5. [자연재난 : 화산폭발] 화산재 낙하 중에는각막 손상 위험이 있으므로 콘택트렌즈를 착용하지 않는다.</div>
+                        <div class="quiz-buttons">
+                            <button class="btn btn-primary true-button">참</button> &nbsp;
+                            <button class="btn btn-primary false-button">거짓</button>
+                        </div>
+                    </div>
+                    <div class="quiz">
+                        <div class="quiz-question">Q6. [자연재난 : 지진] 건물의 균열을 발견하면 그 즉시 보수하고 보강한다.</div>
+                        <div class="quiz-buttons">
+                            <button class="btn btn-primary true-button">참</button>&nbsp;
+                            <button class="btn btn-primary false-button">거짓</button>
+                        </div>
+                    </div>
+                    <div class="quiz">
+                        <div class="quiz-question">Q7. [사회재난 : 도로터널 사고] 화재가 커진 경우에는 재빨리 연기 반대방향으로 터널 내 유도표시등을 따라 밖이나 피난연결통로를 통해 옆 터널로 대피합니다.</div>
+                        <div class="quiz-buttons">
+                            <button class="btn btn-primary true-button">참</button> &nbsp;
+                            <button class="btn btn-primary false-button">거짓</button>
+                        </div>
+                    </div>
+                    <div class="quiz">
+                        <div class="quiz-question">Q8. [사회재난 : 보건의료재난] 의료기관 종사자 파업 시에 응급환자 진료, 중환자실 운영 등 필수진료도 중단된다.</div>
+                        <div class="quiz-buttons">
+                            <button class="btn btn-primary true-button">참</button>&nbsp;
+                            <button class="btn btn-primary false-button">거짓</button>
+                        </div>
+                    </div>
+                    <div class="quiz">
+                        <div class="quiz-question">Q9. [사회재난 : 산불] 산불로 위험에 처했을 경우에는 바람을 등지고 주변의 낙엽, 나뭇가지 등 연소물질을 신속히 제거한 후 소방서, 경찰서 등에 신고한 후 낮은 자세로 엎드려 구조를 기다린다.</div>
+                        <div class="quiz-buttons">
+                            <button class="btn btn-primary true-button">참</button>&nbsp;
+                            <button class="btn btn-primary false-button">거짓</button>
+                        </div>
+                    </div>
+                    <div class="quiz">
+                        <div class="quiz-question">Q10. [자연재난 : 폭염] 무더위에는 카페인이 들어간 음료나 주류는 삼가고, 생수나 이온음료를 마시는 것이 좋다.</div>
+                        <div class="quiz-buttons">
+                            <button class="btn btn-primary true-button">참</button>&nbsp;
+                            <button class="btn btn-primary false-button">거짓</button>
+                        </div>
+                    </div>
                 </div>
                 <button id="submit-button" class="button">제출하기</button>
             </div>

@@ -459,32 +459,13 @@ def comment_post(post_id):
 
 #퀴즈 페이지 코드--------------------------------------------------
 
-def get_random_quiz():
-    connection = sqlite3.connect('quiz.db')
-    cursor = connection.cursor()
-    cursor.execute('SELECT content FROM quiz')
-
-    all_quizzes = cursor.fetchall()
-    num_quizzes = len(all_quizzes)
-
-    random_quizzes = []
-    for _ in range(10):
-        random_index = random.randint(0, num_quizzes - 1)
-        random_quizz = all_quizzes[random_index][0]  # content 값을 가져옴
-        random_quizzes.append(random_quizz)
-
-    connection.close()
-    return random_quizzes
-
-
 @app.route('/quiz')
 def quiz():
     return render_template('quiz.html')
 
 @app.route('/quiz/start')
 def quiz_start():
-    quizzes = get_random_quiz()
-    return render_template('quizstart.html',quizzes=quizzes)
+    return render_template('quizstart.html')
 
 
 @app.route('/quiz/start/submit')
@@ -502,4 +483,4 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
     create_table()
-    app.run(host='localhost', port=9000)
+    app.run(host='localhost', port=8000)

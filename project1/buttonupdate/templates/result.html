@@ -11,13 +11,75 @@
     <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
     <!-- Custom styles -->
     <style>
-        /* 이전 스타일 유지 */
+    body {
+        text-align: center;
+        background-color: white;
+    }
+    .title {
+        width: 100%;
+        border-radius: 15px;
+        font-size: 30px;
+        height: 50px;
+    }
+    .bttn {
+        border-radius: 10px;
+        width: fit-content;
+        min-width: 150px; /* 최소 넓이 설정 */
+        height: fit-content;
+        min-height: 70px; /* 최소 높이 설정 */
+        text-align: center;
+        background-color: white;
+        font-size: 20px;
+        margin-top: 20px;
+        margin-bottom: 20px; /* 아래 여백 설정 */
+        border: 1px solid black; /* 테두리 추가 */
+        color: black;
+        padding: 10px; /* 내부 여백 설정 */
+        text-decoration: none; /* 밑줄 제거 */
+    }
+    .game {
+        margin: 0 auto;
+        width: 60vw;
+        padding: 50px 20px;
+        border: 1px solid black;
+        border-radius: 15px;
+        background-color: whitesmoke;
+        min-height: 60vh;
+    }
+    .result {
+        width: 100%;
+        border: 1px solid black;
+        margin-bottom: 20px;
+        border-radius: 15px;
+        background-color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        font-size: 20px;
+        margin-bottom: 20px;
+        height: 100vh;
+    }
+    .button {
+        background-color:  rgb(48, 93, 229);
+        margin-top: 20px;
+        margin-bottom: 20px;
+        border-radius: 10px;
+        padding: 10px 20px;
+        border: none;
+        outline: none;
+        color: white;
+    }
+    .button:hover {
+        cursor: pointer;
+    }
 
-        .result {
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
-    </style>
+    .game-buttons {
+        display: flex;
+        justify-content: space-evenly;
+        margin-top: 20px;
+    }
+</style>
 </head>
 <body>
     <div class="d-flex" id="wrapper">
@@ -62,12 +124,19 @@
         </nav>
         <div class="container-fluid">
             <div class="game">
-                <h1 class="title">퀴즈 결과</h1>
+                <div class="title">당신의 점수는?</div>&nbsp;&nbsp;
                 <div class="result">
-                    <p>맞은 개수: <span id="correctCount">0</span></p>
-                    <p>틀린 개수: <span id="incorrectCount">0</span></p>
-                </div>
+                    <div class="score">&nbsp;&nbsp;&nbsp;</div>
+                    <div class="score">맞은 개수 : 7개</div>
+                    <div class="score">&nbsp;&nbsp;&nbsp;</div>
+                    <div class="score">틀린 개수 : 3개</div>
+                    <div class="score">&nbsp;&nbsp;&nbsp;</div>
+                    <div class="score">쿠민이 생존!</div>
+                </div>&nbsp;&nbsp;&nbsp;&nbsp;
+                <a href="https://www.safekorea.go.kr/idsiSFK/neo/sfk/cs/contents/prevent/prevent01.html?menuSeq=126" class="bttn" target="_blank">자연재난 행동요령</a>&nbsp;&nbsp;&nbsp;&nbsp;
+                <a href="https://www.safekorea.go.kr/idsiSFK/neo/sfk/cs/contents/prevent/SDIJKM5116_LIST.html?menuSeq=127" class="bttn" target="_blank">사회재난 행동요령</a>
             </div>
+            <button id="restart-button" class="button" onclick="restartQuiz()">다시하기</button>
         </div>
     </div>
 
@@ -80,25 +149,13 @@
     <script src="{{ url_for('static', filename='js/maps_ex.js') }}"></script>
 
     
+    
+    </script>
+    
     <script>
-        // 퀴즈 결과를 가져와서 화면에 표시하는 JavaScript 코드
-        // 여기에 퀴즈 결과를 가져오는 로직을 구현해야 합니다.
-        // 예를 들어, 서버에서 퀴즈 결과 데이터를 가져오는 AJAX 요청을 사용할 수 있습니다.
-        // 가져온 데이터를 이용하여 맞은 개수와 틀린 개수를 업데이트합니다.
-        // 아래는 예시로 맞은 개수를 3개, 틀린 개수를 2개로 설정하는 코드입니다.
-
-        // 퀴즈 결과 데이터 예시
-        const quizResults = {
-            correctCount: 3,
-            incorrectCount: 2
-        };
-
-        // 맞은 개수와 틀린 개수 업데이트
-        const correctCountElement = document.getElementById("correctCount");
-        const incorrectCountElement = document.getElementById("incorrectCount");
-
-        correctCountElement.textContent = quizResults.correctCount;
-        incorrectCountElement.textContent = quizResults.incorrectCount;
+        function restartQuiz() {
+            window.location.href = "/quiz/start/submit/result/restart";
+        }
     </script>
 </body>
 </html>

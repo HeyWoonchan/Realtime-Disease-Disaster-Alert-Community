@@ -136,42 +136,7 @@
                             </div>
                         </div>
                         
-                        <div class="row" style="overflow-x: auto; white-space: nowrap; margin-bottom: 20px;">
-                            {% for item in data %}
-                                {% if loop.index <= 10 %}
-                                    <div class="card" style="width: 300px; height: 300px;">
-                                        <img class="card-img-top" src="{{ url_for('static', filename='img/쿠민.jpg') }}" alt="Card image cap" style="height: 70%;">
-                                        <div class="card-body" style="height: 30%;">
-                                            <h5 class="card-text">{{ item.title }}</h5>
-                                        </div>
-                                    </div>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                        <div class="row">
-                            <div class="col-md-16">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Disaster</th>
-                                            <th>Title</th>
-                                            <th>Publication Date</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for item in data %}
-                                            <tr>
-                                                <td>{{ item.id }}</td>
-                                                <td>{{ item.disaster }}</td>
-                                                <td><strong>{{ item.title }}</strong></td>
-                                                <td>{{ item.pub_date }}</td>
-                                            </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                        
                     <div id="popup">
                         <span id="close" onclick="closePopup()">닫기</span>
                         <div id="content">

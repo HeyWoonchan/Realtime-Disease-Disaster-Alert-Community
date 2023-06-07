@@ -163,7 +163,7 @@
                         {% endfor %}
                         <br>
                         {% for row in data %}
-                        <div class="card" id="1" onclick="moveToLocation(this.id)">
+                        <div class="card" id="{{ loop.index0 }}" onclick="moveToLocation(this.id)">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between">
                                     <h5 class="card-title">[

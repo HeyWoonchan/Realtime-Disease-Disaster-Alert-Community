@@ -29,6 +29,24 @@
         #sidebar-popup.hidden {
             display: none;
         }
+
+        .text-point {
+            font-weight: bold;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+        0% {
+            color: red;
+        }
+        50% {
+            color: lightgray;
+        }
+        100% {
+            color: red;
+        }
+        }
+
     </style>
 </head>
 
@@ -50,60 +68,68 @@
                         onclick="location.href='/quiz'">퀴즈</a>
                 </div>
             </div>
+            <br>
+            <br>
             <div class="container">
                 <div class="row">
                     <div class="col-sm-12 col-md-12">
-                        <div style="height: 100px; margin: 60px; ">
+                        <div style="height: 100px;">
                             <div class="row">
-                                <div class="col-md-2">
+                                <div class="col-md-12">
                                     <div class="card">
-                                        <button id="toggle-button" style="background: none; border: none;">
-                                            <div style="display: flex; justify-content: center;">
-                                                <img style="height:58px; width: auto;"
-                                                    src="{{ url_for('static', filename='img/menu_img.png') }}"
-                                                    alt="메뉴 열기">
+                                        <div class="row">
+                                            <div class="col-md-1">
+                                                <button id="toggle-button" style="background: none; border: none;">
+                                                    <div class="d-flex align-items-center">
+                                                        <img style="height:58px; width: auto; margin-left: 20px;"
+                                                            src="{{ url_for('static', filename='img/menu_img.png') }}"
+                                                            alt="메뉴 열기">
+                                                    </div>
+                                                </button>
                                             </div>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="col-md-10">
-                                    <div class="card">
-                                        <form action="https://search.naver.com/search.naver" method="get"
-                                            class="card-body d-flex justify-content-between align-items-center"
-                                            style="padding: 1px;">
-                                            <!-- 로고 이미지 -->
-                                            <div
-                                                style="width: auto; height: 58px; display: flex; align-items: center; justify-content: center; margin: 1px;">
-                                                <img src="{{ url_for('static', filename='img/n_img.png') }}" alt="logo"
-                                                    style="width: 80%; height: auto;">
+                                            <div class="col-md-11">
+                                                <form action="https://search.naver.com/search.naver" method="get"
+                                                    class="card-body d-flex justify-content-between align-items-center"
+                                                    style="padding: 1px;">
+                                                    <!-- 로고 이미지 -->
+                                                    <div
+                                                        style="width: auto; height: 58px; display: flex; align-items: center; justify-content: center; margin: 1px;">
+                                                        <img src="{{ url_for('static', filename='img/n_img.png') }}" alt="logo"
+                                                            style="width: 80%; height: auto;">
+                                                    </div>
+                                                    <!-- 검색어 입력 칸 -->
+                                                    <input type="text" name="query" class="form-control mr-3"
+                                                        style="flex-grow: 1; border: none;" placeholder="검색어를 입력하세요...">
+                                                    <!-- 검색 버튼 -->
+                                                    <button type="submit" class="btn"
+                                                        style="width: 62px; height: 58px; padding: 0; display: flex; align-items: center; justify-content: center; margin: 1px;">
+                                                        <img src="{{ url_for('static', filename='img/s_img.png') }}"
+                                                            alt="Search" style="max-width: 80%; height: auto;">
+                                                    </button>
+                                                </form>
                                             </div>
-                                            <!-- 검색어 입력 칸 -->
-                                            <input type="text" name="query" class="form-control mr-3"
-                                                style="flex-grow: 1; border: none;" placeholder="검색어를 입력하세요...">
-                                            <!-- 검색 버튼 -->
-                                            <button type="submit" class="btn"
-                                                style="width: 62px; height: 58px; padding: 0; display: flex; align-items: center; justify-content: center; margin: 1px;">
-                                                <img src="{{ url_for('static', filename='img/s_img.png') }}"
-                                                    alt="Search" style="max-width: 80%; height: auto;">
-                                            </button>
-                                        </form>
+                                            
+                                        </div>
+                                        
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                <br>
                 <div class="row">
                     <div class="col-sm-12 col-md-6">
-                        <div class="card" style="height:800px;">
+                        <div class="card" style="height:790px;">
                             <div id="map" class="card-body">
                                 <!-- Map will be placed here. -->
                             </div>
                         </div>
+                        <br>
                         <div class="card">
                             <div class="card-body">
-                                <h5 class="card-title">댓글 목록</h5>
-                                {% for comment in comments %}
+                                <h5 class="card-title">실시간 댓글</h5>
+                                {% for comment in comments[:4] %}
                                 <li>{{ comment[1] }}: {{ comment[2] }}</li>
                                 {% endfor %}
                             </div>
@@ -125,7 +151,7 @@
                             <div class="card-body">
                                 <div class="d-flex justify-content-between">
                                     <h5 class="card-title">
-                                        <span class="text-danger">[ 긴급/재난 ]</span> {{ row[1] }}
+                                        <span class="text-point">[ 긴급/재난 ]</span> {{ row[1] }}
                                     </h5>
                                     <h5 class="card-title">
                                         <span>{{ row[0] }}</span>
@@ -135,8 +161,7 @@
                             </div>
                         </div>
                         {% endfor %}
-                        <hr>
-
+                        <br>
                         {% for row in data %}
                         <div class="card" id="1" onclick="moveToLocation(this.id)">
                             <div class="card-body">
@@ -161,7 +186,7 @@
                             </div>
                         </div>
                         {% endfor %}
-                        <hr>
+                        <br>
                         <div class="card">
                             <div class="card-body">
                                 <h5 class="card-title">연합뉴스속보</h5>

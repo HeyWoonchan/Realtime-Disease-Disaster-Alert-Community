@@ -1,8 +1,8 @@
 var locations = {};
-
+var map;
 function initMap() {
     // Google Maps 지도 인스턴스 생성 (기본 위치는 임의로 설정합니다. 이후에 수정될 것입니다.)
-    var map = new google.maps.Map(document.getElementById('map'), {
+    map = new google.maps.Map(document.getElementById('map'), {
         center: {lat: 37.27538, lng: 127.05488},
         zoom: 10
     });
@@ -51,6 +51,20 @@ function initMap() {
 function moveToLocation(id) {
     var location = locations[id];
     if (location) {
-        map.setCenter(location);
+        map.panTo(location);
     }
 }
+
+document.getElementById("toggle-button").addEventListener("click", function() {
+    var sidebar = document.getElementById("sidebar-popup");
+    var button = document.getElementById("toggle-button");
+    var rect = button.getBoundingClientRect();
+    sidebar.style.top = rect.bottom + "px";
+    sidebar.style.left = rect.left + "px";
+    
+    if (sidebar.classList.contains("hidden")) {
+        sidebar.classList.remove("hidden");
+    } else {
+        sidebar.classList.add("hidden");
+    }
+});

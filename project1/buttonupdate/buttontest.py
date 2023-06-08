@@ -632,21 +632,21 @@ def quiz_start():
     quizzes = get_random_quiz()
     return render_template('quizstart.html', quizzes=quizzes)
 
-@app.route('/quiz/start/submit', methods=['POST'])
-def quiz_result():
-    correct = 0
-    incorrect = 0
-    quizzes = get_random_quiz()
+# @app.route('/quiz/start/submit', methods=['POST'])
+# def quiz_result():
+#     correct = 0
+#     incorrect = 0
+#     quizzes = get_random_quiz()
 
-    for i in range(1, 6):
-        selected_answer = int(request.form['answer{}'.format(i)])
-        quiz = quizzes[i-1]
-        if selected_answer == quiz['answer']:
-            correct += 1
-        else:
-            incorrect += 1
+#     for i in range(1, 6):
+#         selected_answer = int(request.form['answer{}'.format(i)])
+#         quiz = quizzes[i-1]
+#         if selected_answer == quiz['answer']:
+#             correct += 1
+#         else:
+#             incorrect += 1
 
-    return redirect(url_for('result', correct=correct, incorrect=incorrect))
+#     return redirect(url_for('result', correct=correct, incorrect=incorrect))
 
 @app.route('/quiz/result')
 def result():
@@ -661,8 +661,8 @@ def quiz_restart():
 
 # 애플리케이션 실행
 if __name__ == "__main__":
-    os.chdir("project1/buttonupdate")
+    #os.chdir("project1/buttonupdate")
     with app.app_context():
         db.create_all()
     create_table()
-    app.run(host='localhost', port=8000)
+    app.run(host='localhost', port=80)

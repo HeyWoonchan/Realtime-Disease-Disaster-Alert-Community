@@ -656,7 +656,7 @@ def result():
 
 @app.route('/quiz/restart')
 def quiz_restart():
-    return redirect(url_for('quiz_start'))
+    return redirect(url_for('quiz'))
 
 
 # 애플리케이션 실행
@@ -665,4 +665,4 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
     create_table()
-    app.run(host='localhost', port=8050)
+    app.run(host='localhost', port=8000)

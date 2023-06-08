@@ -16,6 +16,7 @@ DB_internal_msg = 'database.db'
 DB_external_msg = 'ForSafeTrip.db'
 DB_WHOnews = 'ExternalNews.db'
 DB_quiz = 'quiz.db'
+DB_world = 'world_disaster.db'
 
 last_execution_time = 0
 last_execution_time_safetrip = 0
@@ -233,7 +234,7 @@ def update_safetrip():
     conn.close()
 
     #navernewsapi로 news db 생성
-def newsapi_dbsave() :
+def update_news_naver() :
     API_KEY = "Gr03tHUOlcbECB9wsRtS"
     API_SECRET = "M3sjGHRdM_"
 
@@ -314,6 +315,54 @@ def newsapi_dbsave() :
 
     print("naver news api로 db 생성 완료")
 
+#해외재난정보 업데이트
+def update_worlddisaster():
+    url = "https://api.reliefweb.int/v1/disasters?appname=disaster-alert-page&profile=list&preset=latest&slim=1"
+
+    conn = sqlite3.connect(DB_world)
+    cursor = conn.cursor()
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS world_disaster (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            created TEXT,
+            country TEXT,
+            title TEXT,
+            link TEXT,
+            disaster TEXT,
+            UNIQUE(title, link) ON CONFLICT IGNORE
+        )
+        ''')
+
+    params = {
+    "offset": 0,
+    "limit": 100,
+    "preset": "latest",
+    "profile": "list"
+    }
+
+    response = requests.get(url,params = params)
+    jdata = response.json()
+    json_data = json.loads(json.dumps(jdata))
+    data = json_data['data']
+
+    disaster_list=[]
+
+    for i in data:
+        field = i['fields']
+        created = (field['date'])['created']
+        country = ((field['country'])[0])['name']
+        title = str(field['name'])
+        disaster = ((field['type'])[0])['name']
+        link = field['url']
+
+        disaster_list.append((created, country, title, disaster, link))
+
+    cursor.executemany("INSERT INTO world_disaster (created, country, title, disaster, link) VALUES (?, ?, ?, ?, ?)", disaster_list)
+
+    conn.commit()
+    conn.close()
+
 
 #커뮤니티 페이지용
 app.config['SECRET_KEY'] = 'mysecretkey1232'
@@ -387,11 +436,14 @@ def home():
 #해외 페이지 
 @app.route('/external')
 def external():
+    update_worlddisaster()
+    update_safetrip()
     global last_execution_time_safetrip
     nowtime = time.time()
     if nowtime-last_execution_time_safetrip>60:
         last_execution_time_safetrip=nowtime
         update_safetrip()
+        update_worlddisaster()
 
     data = get_db_safetrip()
 
@@ -473,6 +525,36 @@ def update_marker_ex():
             marker_data.append({'latitude' : address['lat'], 'longitude': address['lng'], 'what' : what, 'link':link})
     
     return jsonify(marker_data)
+
+@app.route('/update_worlddisaster')
+def update_world():
+    con = sqlite3.connect(DB_world, isolation_level=None)
+    cursor = con.cursor()
+    cursor.execute('select * from world_disaster order by id asc limit 5')
+    gotdata = cursor.fetchall()
+
+    api_key = 'AIzaSyCnp17nNrPOjhrQk4Pp7HUVfMGzyqGw5eI'
+    maps = googlemaps.Client(key=api_key)
+    
+    print(gotdata)
+
+    marker_data = []
+
+    for row in gotdata:
+        where = row[2]
+        what = row[3]
+        link = row[4]
+        disaster = row[5]
+
+        results = maps.geocode(where)
+
+        for result in results:
+            address = result['geometry']['location']
+            print(address['lat'], address['lng'], what)
+            marker_data.append({'latitude' : address['lat'], 'longitude': address['lng'], 'what' : what, 'link':link, 'disaster':disaster})
+    
+    return jsonify(marker_data)
+    
     
 @app.route('/update_WHOnews')
 def update_WHOnews():
@@ -487,19 +569,18 @@ def update_WHOnews():
 #뉴스 페이지
 @app.route('/newspage')
 def news():
-    newsapi_dbsave()
+    update_news_naver()
     global last_execution_time_safetrip
     nowtime = time.time()
     if nowtime-last_execution_time_safetrip>60:
         last_execution_time_safetrip=nowtime
         update_news_naver()
 
-    conn = sqlite3.connect('news.db')
+    conn = sqlite3.connect(DB_news)
     cursor = conn.cursor()
 
     # 데이터베이스에서 제목과 링크 조회
-    query = "SELECT id, title, link, disaster, pub_date FROM news ORDER BY pub_date DESC"
-    cursor.execute(query)
+    cursor.execute("SELECT id, title, link, disaster, pub_date FROM news ORDER BY pub_date DESC")
     rows = cursor.fetchall()
 
     data = []
@@ -630,8 +711,8 @@ def quiz_restart():
 
 # 애플리케이션 실행
 if __name__ == "__main__":
-    os.chdir("project1/buttonupdate")
+    # os.chdir("project1/buttonupdate")
     with app.app_context():
         db.create_all()
     create_table()
-    app.run(host='localhost', port=8033)
+    app.run(host='0.0.0.0', port=80)

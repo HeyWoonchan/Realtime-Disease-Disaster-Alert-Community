@@ -24,27 +24,27 @@
     .bttn {
         border-radius: 10px;
         width: fit-content;
-        min-width: 150px; /* 최소 넓이 설정 */
+        min-width: 150px;
         height: fit-content;
-        min-height: 70px; /* 최소 높이 설정 */
+        min-height: 70px;
         text-align: center;
         background-color: white;
         font-size: 20px;
-        margin-top: 20px;
-        margin-bottom: 20px; /* 아래 여백 설정 */
-        border: 1px solid black; /* 테두리 추가 */
+        margin-top: 10px;
+        margin-bottom: 20px;
+        border: 1px solid black;
         color: black;
-        padding: 10px; /* 내부 여백 설정 */
-        text-decoration: none; /* 밑줄 제거 */
+        padding: 10px;
+        text-decoration: none;
     }
     .game {
         margin: 0 auto;
-        width: 60vw;
+        width: calc(60vw - 10px); /* Subtracting 10px to account for the difference */
         padding: 50px 20px;
         border: 1px solid black;
         border-radius: 15px;
         background-color: whitesmoke;
-        min-height: 60vh;
+        min-height: 50vh;
     }
     .result {
         width: 100%;
@@ -62,8 +62,8 @@
     }
     .button {
         background-color:  rgb(48, 93, 229);
-        margin-top: 20px;
-        margin-bottom: 20px;
+        margin-top: 30px;
+        margin-bottom: 10px;
         border-radius: 10px;
         padding: 10px 20px;
         border: none;
@@ -124,7 +124,7 @@
         </nav>
         <div class="container-fluid">
             <div class="game">
-                <div class="title">당신의 점수는?</div>
+                <div class="title">당신의 점수는?!</div>
                 &nbsp;&nbsp;
                 <div class="result">
                     <div class="score">&nbsp;&nbsp;&nbsp;</div>
@@ -135,7 +135,7 @@
                     {% if request.args.get('correct', 0)|int >= 4 %}
                         <div class="score">쿠민이 생존!</div>
                     {% else %}
-                        <div class="score">쿠민이 미안...</div>
+                        <div class="score">쿠민아 미안...</div>
                     {% endif %}
                 </div>
                 <br>

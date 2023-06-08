@@ -595,20 +595,31 @@ def comment_post(post_id):
 def get_random_quiz():
     connection = sqlite3.connect('quiz.db')
     cursor = connection.cursor()
-    cursor.execute('SELECT content FROM quiz')
+    cursor.execute('SELECT content, type, subtype, answer FROM quiz')
 
     all_quizzes = cursor.fetchall()
     num_quizzes = len(all_quizzes)
 
     random_quizzes = []
-    for _ in range(10):
+    for index in range(1, 6):  # 1부터 5까지의 범위로 변경
         random_index = random.randint(0, num_quizzes - 1)
-        random_quizz = all_quizzes[random_index][0]  # content 값을 가져옴
-        random_quizzes.append(random_quizz)
+        random_quiz = all_quizzes[random_index]  # 모든 값을 가져옴
+        answer = random_quiz[3]
+        if answer == '참':
+            answer_value = 1
+        else:
+            answer_value = 0
+        quiz_dict = {
+            'number': index,
+            'type': random_quiz[1],
+            'subtype': random_quiz[2],
+            'content': random_quiz[0],
+            'answer': answer_value
+        }
+        random_quizzes.append(quiz_dict)
 
     connection.close()
     return random_quizzes
-
 
 @app.route('/quiz')
 def quiz():

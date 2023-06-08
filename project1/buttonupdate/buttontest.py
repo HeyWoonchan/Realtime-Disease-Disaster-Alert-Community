@@ -715,4 +715,4 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
     create_table()
-    app.run(host='0.0.0.0', port=80)
+    app.run( port=80)

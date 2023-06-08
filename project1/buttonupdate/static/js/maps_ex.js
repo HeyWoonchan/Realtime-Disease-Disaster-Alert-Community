@@ -91,12 +91,14 @@ function initMap2() {
 }
 
 
-function openPopup() {
-    document.getElementById('popup').style.display = 'block';
+function openPopup(link) {
+    var iframe = document.getElementById("exnews");
+    iframe.src = link;
+    document.getElementById("popup").style.display = "block";
 }
 
 function closePopup() {
-    document.getElementById('popup').style.display = 'none';
+    document.getElementById("popup").style.display = "none";
 }
 
 initMap()

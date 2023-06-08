@@ -596,29 +596,31 @@ def get_random_quiz():
     connection = sqlite3.connect('quiz.db')
     cursor = connection.cursor()
     cursor.execute('SELECT content, type, subtype, answer FROM quiz')
-
     all_quizzes = cursor.fetchall()
-    num_quizzes = len(all_quizzes)
+    connection.close()
 
     random_quizzes = []
     for index in range(1, 6):
-        random_index = random.randint(0, num_quizzes - 1)
+        random_index = random.randint(0, len(all_quizzes) - 1)
         random_quiz = all_quizzes[random_index]
+        content = random_quiz[0]
+        quiz_type = random_quiz[1]
+        subtype = random_quiz[2]
         answer = random_quiz[3]
-        if answer == '참':
-            answer_value = 1
-        else:
-            answer_value = 0
+
+        answer_value = 1 if answer == '참' else 0
+
         quiz_dict = {
             'number': index,
-            'type': random_quiz[1],
-            'subtype': random_quiz[2],
-            'content': random_quiz[0],
+            'type': quiz_type,
+            'subtype': subtype,
+            'content': content,
             'answer': answer_value
         }
         random_quizzes.append(quiz_dict)
 
-    connection.close()
+        all_quizzes.pop(random_index)  # 선택한 퀴즈를 제거하여 중복 선택 방지
+
     return random_quizzes
 
 @app.route('/quiz')
@@ -630,26 +632,21 @@ def quiz_start():
     quizzes = get_random_quiz()
     return render_template('quizstart.html', quizzes=quizzes)
 
-@app.route('/quiz/start/submit', methods=['GET', 'POST'])
+@app.route('/quiz/start/submit', methods=['POST'])
 def quiz_result():
-    if request.method == 'POST':
-        correct = 0
-        incorrect = 0
-        for i in range(1, 6):
-            selected_answer = int(request.form['answer{}'.format(i)])
-            quiz = get_random_quiz()[i-1]
-            if selected_answer == quiz['answer']:
-                correct += 1
-            else:
-                incorrect += 1
-        return redirect(url_for('result', correct=correct, incorrect=incorrect))
-    else:
-        return redirect(url_for('result'))
+    correct = 0
+    incorrect = 0
+    quizzes = get_random_quiz()
 
-@app.route('/quiz/start/submit', methods=['GET'])
-def quiz_result_get():
-    return redirect(url_for('quiz_start'))
+    for i in range(1, 6):
+        selected_answer = int(request.form['answer{}'.format(i)])
+        quiz = quizzes[i-1]
+        if selected_answer == quiz['answer']:
+            correct += 1
+        else:
+            incorrect += 1
 
+    return redirect(url_for('result', correct=correct, incorrect=incorrect))
 
 @app.route('/quiz/result')
 def result():

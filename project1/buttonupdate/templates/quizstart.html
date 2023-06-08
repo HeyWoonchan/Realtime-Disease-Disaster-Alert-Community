@@ -47,7 +47,9 @@
         }
     
         .quiz-question {
+            font-weight : 700;
             margin-top:8px;
+            font-size : 40;
             margin-bottom: 20px;
         }
     
@@ -88,6 +90,11 @@
         .true-button.clicked,
     .false-button.clicked {
         background-color: rgb(39, 63, 214);
+    }
+    .quiz-title{
+        font-size : 18;
+        margin-top : 5px;
+        font-weight: 700;
     }
     </style>
 </head>
@@ -143,13 +150,13 @@
                     <div class="title">다음 재난 상황별 행동 요령 질문에 답하고, 쿠민이를 재난에서 구해주세요!</div>
                     {% for quiz in quizzes %}
                     <div class="quiz">
-                        <div class="quiz-question">{{ quiz }}</div>
+                        <div class="quiz-title">Q{{ quiz.number }}. {{ quiz.type }} : {{ quiz.subtype }}</div>
+                        <div class="quiz-question">{{ quiz.content }}</div>
                         <div class="quiz-buttons">
-                            <button class="btn btn-primary true-button">참</button>&nbsp;&nbsp;&nbsp;&nbsp;
-                            
-                            <button class="btn btn-primary false-button">거짓</button>
+                            <button class="btn btn-primary true-button" data-value="1">참</button>&nbsp;&nbsp;&nbsp;&nbsp;
+                            <button class="btn btn-primary false-button" data-value="0">거짓</button>
                         </div>
-                    </div>
+                    </div>                    
                     {% endfor %}
                 </div>
                 <button id="submit-button" class="button">제출하기</button>

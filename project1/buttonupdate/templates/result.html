@@ -124,16 +124,23 @@
         </nav>
         <div class="container-fluid">
             <div class="game">
-                <div class="title">당신의 점수는?</div>&nbsp;&nbsp;
+                <div class="title">당신의 점수는?</div>
+                &nbsp;&nbsp;
                 <div class="result">
                     <div class="score">&nbsp;&nbsp;&nbsp;</div>
-                    <div class="score">맞은 개수 : 4개</div>
+                    <div class="score">맞은 개수: {{ request.args.get('correct', 0) }}개</div>
                     <div class="score">&nbsp;&nbsp;&nbsp;</div>
-                    <div class="score">틀린 개수 : 1개</div>
+                    <div class="score">틀린 개수: {{ request.args.get('incorrect', 0) }}개</div>
                     <div class="score">&nbsp;&nbsp;&nbsp;</div>
-                    <div class="score">쿠민이 생존!</div>
-                </div>&nbsp;&nbsp;&nbsp;&nbsp;
-                <a href="https://www.safekorea.go.kr/idsiSFK/neo/sfk/cs/contents/prevent/prevent01.html?menuSeq=126" class="bttn" target="_blank">자연재난 행동요령</a>&nbsp;&nbsp;&nbsp;&nbsp;
+                    {% if request.args.get('correct', 0)|int >= 4 %}
+                        <div class="score">쿠민이 생존!</div>
+                    {% else %}
+                        <div class="score">쿠민이 미안...</div>
+                    {% endif %}
+                </div>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <a href="https://www.safekorea.go.kr/idsiSFK/neo/sfk/cs/contents/prevent/prevent01.html?menuSeq=126" class="bttn" target="_blank">자연재난 행동요령</a>
+                &nbsp;&nbsp;&nbsp;&nbsp;
                 <a href="https://www.safekorea.go.kr/idsiSFK/neo/sfk/cs/contents/prevent/SDIJKM5116_LIST.html?menuSeq=127" class="bttn" target="_blank">사회재난 행동요령</a>
             </div>
             <button id="restart-button" class="button" onclick="restartQuiz()">다시하기</button>
@@ -154,7 +161,7 @@
     
     <script>
         function restartQuiz() {
-            window.location.href = "/quiz/start/submit/result/restart";
+            window.location.href = "/quiz/restart";
         }
     </script>
 </body>

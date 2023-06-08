@@ -146,22 +146,27 @@
            
             <div class="container-fluid">
                 <div class="game">
-                    
                     <div class="title">다음 재난 상황별 행동 요령 질문에 답하고, 쿠민이를 재난에서 구해주세요!</div>
-                    {% for quiz in quizzes %}
-                    <div class="quiz">
-                        <div class="quiz-title">Q{{ quiz.number }}. {{ quiz.type }} : {{ quiz.subtype }}</div>
-                        <div class="quiz-question">{{ quiz.content }}</div>
-                        <div class="quiz-buttons">
-                            <button class="btn btn-primary true-button" data-value="1">참</button>&nbsp;&nbsp;&nbsp;&nbsp;
-                            <button class="btn btn-primary false-button" data-value="0">거짓</button>
+                    <form id="quiz-form" action="{{ url_for('quiz_result') }}" method="get">
+                        {% for quiz in quizzes %}
+                        <div class="quiz">
+                            <div class="quiz-title">Q{{ quiz.number }}. {{ quiz.type }} : {{ quiz.subtype }}</div>
+                            <div class="quiz-question">{{ quiz.content }}</div>
+                            <div class="quiz-buttons">
+                                <label>
+                                    <input type="radio" name="answer{{ quiz.number }}" value="1"> 참
+                                </label>
+                                <label>
+                                    <input type="radio" name="answer{{ quiz.number }}" value="0"> 거짓
+                                </label>
+                            </div>
                         </div>
-                    </div>                    
-                    {% endfor %}
+                        {% endfor %}
+                        <button class="button" type="submit">제출하기</button>
+                    </form>
                 </div>
-                <button id="submit-button" class="button">제출하기</button>
+                
             </div>
-        </div>
     </div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -179,10 +184,21 @@
     
         $(document).ready(function() {
             $("#submit-button").click(function() {
+                $(".quiz").each(function() {
+                    var answer = $(this).find(".true-button").hasClass("clicked") ? 1 : 0;
+                    var correctAnswer = $(this).data("answer");
+                    if (answer === correctAnswer) {
+                        correct++;
+                    } else {
+                        incorrect++;
+                    }
+                });
+    
                 window.location.href = "{{ url_for('quiz_result') }}?correct=" + correct + "&incorrect=" + incorrect;
             });
         });
     </script>
+    
     <script>
         $(document).ready(function() {
             $(".true-button, .false-button").click(function() {

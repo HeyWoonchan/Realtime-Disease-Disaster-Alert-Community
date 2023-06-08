@@ -601,9 +601,9 @@ def get_random_quiz():
     num_quizzes = len(all_quizzes)
 
     random_quizzes = []
-    for index in range(1, 6):  # 1부터 5까지의 범위로 변경
+    for index in range(1, 6):
         random_index = random.randint(0, num_quizzes - 1)
-        random_quiz = all_quizzes[random_index]  # 모든 값을 가져옴
+        random_quiz = all_quizzes[random_index]
         answer = random_quiz[3]
         if answer == '참':
             answer_value = 1
@@ -628,16 +628,39 @@ def quiz():
 @app.route('/quiz/start')
 def quiz_start():
     quizzes = get_random_quiz()
-    return render_template('quizstart.html',quizzes=quizzes)
+    return render_template('quizstart.html', quizzes=quizzes)
 
-
-@app.route('/quiz/start/submit')
+@app.route('/quiz/start/submit', methods=['GET', 'POST'])
 def quiz_result():
-    return render_template('result.html')
+    if request.method == 'POST':
+        correct = 0
+        incorrect = 0
+        for i in range(1, 6):
+            selected_answer = int(request.form['answer{}'.format(i)])
+            quiz = get_random_quiz()[i-1]
+            if selected_answer == quiz['answer']:
+                correct += 1
+            else:
+                incorrect += 1
+        return redirect(url_for('result', correct=correct, incorrect=incorrect))
+    else:
+        return redirect(url_for('result'))
 
-@app.route('/quiz/start/submit/result/restart')
+@app.route('/quiz/start/submit', methods=['GET'])
+def quiz_result_get():
+    return redirect(url_for('quiz_start'))
+
+
+@app.route('/quiz/result')
+def result():
+    correct = int(request.args.get('correct', 0))
+    incorrect = int(request.args.get('incorrect', 0))
+    return render_template('result.html', correct=correct, incorrect=incorrect)
+
+@app.route('/quiz/restart')
 def quiz_restart():
-    return redirect('/quiz')
+    return redirect(url_for('quiz_start'))
+
 
 # 애플리케이션 실행
 if __name__ == "__main__":
@@ -645,4 +668,4 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
     create_table()
-    app.run(host='localhost', port=8033)
+    app.run(host='localhost', port=8050)

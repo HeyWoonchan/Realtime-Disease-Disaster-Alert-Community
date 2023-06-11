@@ -118,27 +118,36 @@
                         <h1 class="mt-4">외교부 해외 안전공지</h1>
                         <div class="row">
                             <div class="col-sm-12 col-md-9">
-                                <div class="card" style="height:700px;">
-                                  <div id="map" class="card-body">
-                                    <!-- Map will be placed here. -->
-                                  </div>
-                                </div>
+                                
                                 
                             </div>
                             <div class="col-sm-12 col-md-3">
                                 <!-- 여기에 두 번째 요소의 내용을 넣습니다. -->
-                                {% for row in dataST %}
+                                
+                          </div>
+                        </div>
+
+                        <div class="card" style="height:700px;">
+                            <div id="map" class="card-body">
+                              <!-- Map will be placed here. -->
+                            </div>
+                        </div>
+                        <div class="row">
+                            {% for row in dataST %}
+                            <div class="col-4">
                                 <div onclick="openPopup('{{ row[3] }}')">
-                                    <div class="card">
+                                    <div class="card" style="width: 385px;">
                                         <div class="card-body">
                                             <h5 class="card-title">{{ row[1] }}</h5>
                                             <p class="card-text">{{ row[2] }}</p>
                                         </div>
                                     </div>
                                 </div>
-                                {% endfor %}
-                          </div>
+                            </div> 
+                            {% endfor %}
                         </div>
+                        
+
                         <h1 class="mt-4">world disaster</h1>
                         <div class="card" style="height: 700px">
                             <div id="map2" class="card-body"> </div>

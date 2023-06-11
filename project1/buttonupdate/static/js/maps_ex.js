@@ -38,10 +38,10 @@ function initMap() {
                 infowindow.open(map1, newMarker);
             });
 
-            // 첫 번째 마커의 경우, 정보 창을 바로 엽니다.
-            if (index === 0) {
-                infowindow.open(map1, newMarker);
-            }
+            
+            
+            infowindow.open(map1, newMarker);
+            
         });
     });
 }

@@ -147,14 +147,16 @@
                         
                         <div class="row">
                             {% for row in dataWD %}
+                            <div class="col-4">
                                 <div onclick="openPopup('{{ row[4] }}')">
-                                    <div class="card" style="width: 500px;">
+                                    <div class="card" style="width: 385px;">
                                         <div class="card-body">
                                             <h5 class="card-title">{{ row[2] }}</h5>
                                             <p class="card-text">{{ row[3] }}</p>
                                         </div>
                                     </div>
                                 </div>
+                            </div> 
                             {% endfor %}
                         </div>
                         

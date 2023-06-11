@@ -134,6 +134,28 @@
                         <div style="text-align: center;">
                             <small style="color:grey;">클릭시 댓글 더보기/접기</small>
                         </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <a href="/external" class="text-decoration-none text-dark">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">해외정보 페이지</h5>
+                                            <p class="card-text">클릭하시면 해외정보 페이지로 넘어갑니다.</p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="/community" class="text-decoration-none text-dark">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">커뮤니티 페이지</h5>
+                                            <p class="card-text">클릭하시면 커뮤니티 페이지로 넘어갑니다.</p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-sm-12 col-md-6">
                         <!-- 여기에 두 번째 요소의 내용을 넣습니다. -->
@@ -187,7 +209,7 @@
                         <div class="row">
                         {% for item in news %}
                         <div class="col-md-6">
-                            <div class="card" onclick="openPopup('{{ item.link }}')" style="width: 270px; height: 300px;">
+                            <div class="card" onclick="location.href='/newspage'" style="width: 270px; height: 300px;">
                                 <img src="{{ url_for('static', filename='img/쿠민.jpg') }}" class="card-img-top" style="height: 70%;">
                                 <div class="card-body" style="height: 30%;"> 
                                     <p class="card-text">{{ item.title }}</p>
@@ -196,38 +218,11 @@
                         </div>
                         {% endfor %}
                         </div>
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">연합뉴스속보</h5>
-                                <p class="card-text">{{ yh_news | safe}}</p>
-                                <h5 class="card-title">네이버뉴스 속보 검색결과</h5>
-                                <p class="card-text">{{ nv_news }}</p>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-6">
-                                <a href="/external" class="text-decoration-none text-dark">
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <h5 class="card-title">해외정보 페이지</h5>
-                                            <p class="card-text">클릭하시면 해외정보 페이지로 넘어갑니다.</p>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="col-6">
-                                <a href="/community" class="text-decoration-none text-dark">
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <h5 class="card-title">커뮤니티 페이지</h5>
-                                            <p class="card-text">클릭하시면 커뮤니티 페이지로 넘어갑니다.</p>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
+                        
+                        
                     </div>
                 </div>
+                
                 <div class="row">
                     <div class="col-sm-12 col-md-12">
                         <div class="card">

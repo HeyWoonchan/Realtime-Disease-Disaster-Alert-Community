@@ -131,6 +131,9 @@
                                 </ul>
                             </div>
                         </div>
+                        <div style="text-align: center;">
+                            <small style="color:grey;">클릭시 댓글 더보기/접기</small>
+                        </div>
                     </div>
                     <div class="col-sm-12 col-md-6">
                         <!-- 여기에 두 번째 요소의 내용을 넣습니다. -->
@@ -149,6 +152,9 @@
                             </div>
                         </div>
                         {% endfor %}
+                        <div style="text-align: center;">
+                            <small style="color:grey;">가장 최근의 긴급/재난 주제의 재난문자 목록을 보여줍니다.</small>
+                        </div>
                         <br>
                         {% for row in data %}
                         <div class="card" id="{{ loop.index0 }}" onclick="moveToLocation(this.id)">
@@ -174,7 +180,22 @@
                             </div>
                         </div>
                         {% endfor %}
+                        <div style="text-align: center;">
+                            <small style="color:grey;">가장 최근의 전체 재난문자 목록을 보여줍니다.</small>
+                        </div>
                         <br>
+                        <div class="row">
+                        {% for item in news %}
+                        <div class="col-md-6">
+                            <div class="card" onclick="openPopup('{{ item.link }}')" style="width: 270px; height: 300px;">
+                                <img src="{{ url_for('static', filename='img/쿠민.jpg') }}" class="card-img-top" style="height: 70%;">
+                                <div class="card-body" style="height: 30%;"> 
+                                    <p class="card-text">{{ item.title }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        </div>
                         <div class="card">
                             <div class="card-body">
                                 <h5 class="card-title">연합뉴스속보</h5>

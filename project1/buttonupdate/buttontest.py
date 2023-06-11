@@ -378,11 +378,10 @@ def home():
         comments = c.fetchall()
         conn.close()
         data = get_msg_db()
-        yh_news=update_news()
+        news=news_db_get()
         data_emerg = get_msg_db_emerg()
-        nv_news=update_news_naver()
         dates = list(chart_data.keys())[::-1] 
-        return render_template('index.html', yh_news=yh_news, nv_news=nv_news ,data=data, data_emerg=data_emerg, comments=comments, chart_data=chart_data,dates=dates)
+        return render_template('index.html', news=news,data=data, data_emerg=data_emerg, comments=comments, chart_data=chart_data,dates=dates)
     
 #해외 페이지 
 @app.route('/external')
@@ -483,6 +482,24 @@ def update_WHOnews():
 
     print(link)
     return jsonify({'link' : link})
+
+
+def news_db_get():
+    conn = sqlite3.connect('news.db')
+    cursor = conn.cursor()
+
+    # 데이터베이스에서 제목과 링크 조회
+    query = "SELECT id, title, link, disaster, pub_date FROM news ORDER BY pub_date DESC"
+    cursor.execute(query)
+    rows = cursor.fetchall()
+
+    data = []
+    for row in rows:
+        pub_date_str = row[4]  # pub_date를 문자열로 가져옴
+        pub_date = datetime.strptime(pub_date_str, "%Y-%m-%d %H:%M:%S") # 문자열을 datetime 객체로 변환
+        formatted_pub_date = pub_date.strftime("%Y-%m-%d %H:%M:%S")  # 원하는 형식으로 날짜 포맷팅
+        data.append({'id': row[0], 'title': row[1], 'link': row[2], 'disaster': row[3], 'pub_date': formatted_pub_date})
+    return data[:2]
 
 #뉴스 페이지
 @app.route('/newspage')

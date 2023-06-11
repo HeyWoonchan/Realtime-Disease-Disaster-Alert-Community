@@ -374,7 +374,7 @@ def home():
         chart_data = get_chart_data()
         conn = sqlite3.connect(DB_comment)
         c = conn.cursor()
-        c.execute("SELECT * FROM comments")
+        c.execute("SELECT * FROM comments ORDER BY id DESC LIMIT 10")
         comments = c.fetchall()
         conn.close()
         data = get_msg_db()

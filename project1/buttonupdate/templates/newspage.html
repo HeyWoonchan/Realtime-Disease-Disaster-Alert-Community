@@ -101,7 +101,7 @@
                                 {% for item in data[:6] %}
                                 <div class="col-md-4">
                                     <div class="card" onclick="openPopup('{{ item.link }}')" style="width: 300px; height: 300px;">
-                                        <img src="{{ url_for('static', filename='img/쿠민.jpg') }}" class="card-img-top" style="height: 70%;">
+                                        <img src= "{{ item.thumbnail }}" class="card-img-top" style="height: 70%;">
                                         <div class="card-body" style="height: 30%;">
                                             <p class="card-text">{{ item.title }}</p>
                                         </div>

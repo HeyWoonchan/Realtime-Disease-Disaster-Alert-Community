@@ -18,6 +18,9 @@ DB_WHOnews = 'ExternalNews.db'
 DB_quiz = 'quiz.db'
 DB_world = 'world_disaster.db'
 
+# DB_external_msg db:: 외교부안전공지 테이블: ForSateTrip, 해외재난 테이블 - worlddisaster
+# DB_news = 네이버 뉴스 테이블: navernews
+
 last_execution_time = 0
 last_execution_time_safetrip = 0
 
@@ -83,6 +86,16 @@ def get_db_safetrip():
     conn.close()
     return data
 
+#세계재난정보 불러오기
+def get_db_worlddisater():
+    conn = sqlite3.connect(DB_external_msg)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM world_disaster ORDER BY id LIMIT 3")
+    data = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+    return data
 
 # 재난문자 데이터베이스 업데이트 함수
 def update_msg_db():
@@ -234,7 +247,7 @@ def update_safetrip():
     conn.close()
 
     #navernewsapi로 news db 생성
-def update_news_naver() :
+def update_newsapi_naver() :
     API_KEY = "Gr03tHUOlcbECB9wsRtS"
     API_SECRET = "M3sjGHRdM_"
 
@@ -255,16 +268,19 @@ def update_news_naver() :
         "[속보] 정전",
         "[속보] 경계경보",
         "[속보] 공습경보",
-        "[속보] 사고"
+        "[속보] 사고",
+        "[속보] 기상청"
     ]
+    cursor.execute("DROP TABLE IF EXISTS navernews")
 
     cursor.execute('''
-    CREATE TABLE IF NOT EXISTS news (
+    CREATE TABLE IF NOT EXISTS navernews (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         pub_date TEXT,
         title TEXT,
         link TEXT,
         disaster TEXT,
+        thumbnail TEXT,
         UNIQUE(title, link) ON CONFLICT IGNORE
     )
     ''')
@@ -301,14 +317,29 @@ def update_news_naver() :
             for char, replacement in replace_chars.items():
                 title = title.replace(char, replacement)
             link = item['originallink']
+            if not link:  
+                continue
             date = item['pubDate']
-            parsed_date = datetime.strptime(date, "%a, %d %b %Y %H:%M:%S %z")  # 날짜 문자열을 파싱하여 datetime 객체로 변환
-            pub_date = parsed_date.strftime("%Y-%m-%d %H:%M:%S")  # 원하는 형식으로 날짜 포맷팅
-
-            news_list.append((pub_date, title, link, keyword[5:]))
+            parsed_date = datetime.strptime(date, "%a, %d %b %Y %H:%M:%S %z")  
+            pub_date = parsed_date.strftime("%Y-%m-%d %H:%M:%S")  
+            try:
+                news_response = requests.get(link)
+                soup = BeautifulSoup(news_response.content, 'html.parser')
+                thumbnail_meta_tag = soup.find('meta', {'property': 'og:image'})
+                thumbnail = thumbnail_meta_tag['content'] if thumbnail_meta_tag else None
+                news_list.append((pub_date, title, link, keyword[5:], thumbnail))
+                
+            except requests.exceptions.ConnectionError as e:
+                # 오류 처리 로직 추가
+                thumbnail = None  # None인 경우에도 news_list에 추가
+                news_list.append((pub_date, title, link, keyword[5:], thumbnail))
+                print("Connection Error:", e)
+                continue  # 다음 뉴스 기사로 넘어감
+        print(keyword + " 완료")
+            
 
     news_list.sort(reverse=True)
-    cursor.executemany("INSERT INTO news (pub_date, title, link, disaster) VALUES (?, ?, ?, ?)", news_list)
+    cursor.executemany("INSERT INTO navernews (pub_date, title, link, disaster, thumbnail) VALUES (?, ?, ?, ?, ?)", news_list)
 
     conn.commit()
     conn.close()
@@ -319,7 +350,7 @@ def update_news_naver() :
 def update_worlddisaster():
     url = "https://api.reliefweb.int/v1/disasters?appname=disaster-alert-page&profile=list&preset=latest&slim=1"
 
-    conn = sqlite3.connect(DB_world)
+    conn = sqlite3.connect(DB_external_msg)
     cursor = conn.cursor()
 
     cursor.execute('''
@@ -399,6 +430,7 @@ def comment():
 # 홈 페이지 경로 (GET 및 POST 메서드)
 @app.route('/', methods=['GET', 'POST'])
 def home():
+    
     global last_execution_time
     current_time = time.time()
     print(os.getcwd())
@@ -445,10 +477,11 @@ def external():
         update_safetrip()
         update_worlddisaster()
 
-    data = get_db_safetrip()
+    data_safettrip = get_db_safetrip()
+    data_disaster = get_db_worlddisater()
 
 
-    return render_template('external.html', data = data)
+    return render_template('external.html', dataST = data_safettrip, dataWD = data_disaster)
 
 
 # 재난 메시지 업데이트를 위한 함수
@@ -528,7 +561,7 @@ def update_marker_ex():
 
 @app.route('/update_worlddisaster')
 def update_world():
-    con = sqlite3.connect(DB_world, isolation_level=None)
+    con = sqlite3.connect(DB_external_msg, isolation_level=None)
     cursor = con.cursor()
     cursor.execute('select * from world_disaster order by id asc limit 5')
     gotdata = cursor.fetchall()
@@ -569,26 +602,23 @@ def update_WHOnews():
 #뉴스 페이지
 @app.route('/newspage')
 def news():
-    update_news_naver()
-    global last_execution_time_safetrip
-    nowtime = time.time()
-    if nowtime-last_execution_time_safetrip>60:
-        last_execution_time_safetrip=nowtime
-        update_news_naver()
+    update_newsapi_naver()
+    # global last_execution_time_safetrip
+    # nowtime = time.time()
+    # if nowtime-last_execution_time_safetrip>60:
+    #     last_execution_time_safetrip=nowtime
+    #     update_newsapi_naver()
 
     conn = sqlite3.connect(DB_news)
     cursor = conn.cursor()
 
-    # 데이터베이스에서 제목과 링크 조회
-    cursor.execute("SELECT id, title, link, disaster, pub_date FROM news ORDER BY pub_date DESC")
+    cursor.execute("SELECT id, title, link, disaster, pub_date, thumbnail FROM navernews ORDER BY pub_date DESC limit 50")
     rows = cursor.fetchall()
 
     data = []
     for row in rows:
-        pub_date_str = row[4]  # pub_date를 문자열로 가져옴
-        pub_date = datetime.strptime(pub_date_str, "%Y-%m-%d %H:%M:%S") # 문자열을 datetime 객체로 변환
-        formatted_pub_date = pub_date.strftime("%Y-%m-%d %H:%M:%S")  # 원하는 형식으로 날짜 포맷팅
-        data.append({'id': row[0], 'title': row[1], 'link': row[2], 'disaster': row[3], 'pub_date': formatted_pub_date})
+        data.append({'id': row[0], 'title': row[1], 'link': row[2], 'disaster': row[3], 'pub_date': row[4], 'thumbnail': row[5]})
+
     return render_template('newspage.html', data=data)
 
 
@@ -712,7 +742,8 @@ def quiz_restart():
 # 애플리케이션 실행
 if __name__ == "__main__":
     # os.chdir("project1/buttonupdate")
+    os.path.dirname(os.path.abspath(__file__))
     with app.app_context():
         db.create_all()
     create_table()
-    app.run( port=80)
+    app.run(host='localhost', port=8033)

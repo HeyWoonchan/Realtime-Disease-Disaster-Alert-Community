@@ -108,8 +108,9 @@
                 </nav>
                 <!-- Page content-->
                 <div class="container-fluid">
-                    <h1 class="mt-4">국외 정보</h1>
+                    <h1 class="mt-4">세계 재난 정보</h1>
                     <div class="container">
+                        <h1 class="mt-4">외교부 해외 안전공지</h1>
                         <div class="row">
                             <div class="col-sm-12 col-md-6">
                                 <div class="card" style="height:800px;">
@@ -127,7 +128,7 @@
                                         <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec consequat ultrices tellus, ut lobortis nisi maximus at. Nulla facilisi. Sed ultrices eleifend metus ac vestibulum. Integer euismod sem vitae volutpat sagittis. Fusce id malesuada odio, sed interdum nisl. Maecenas varius ex eu mauris tempus, id feugiat erat gravida. Phasellus pellentesque, metus nec interdum aliquet, neque ex eleifend tortor, eget convallis lectus turpis non lorem. Vestibulum a lectus massa. Mauris sed risus non orci sollicitudin feugiat. Nullam bibendum hendrerit nunc ac tincidunt.</p>
                                     </div>
                                 </div>
-                                {% for row in data %}
+                                {% for row in dataST %}
                                 <div onclick="openPopup('{{ row[3] }}')">
                                     <div class="card">
                                         <div class="card-body">
@@ -139,22 +140,29 @@
                                 {% endfor %}
                           </div>
                         </div>
-                        <div class="card" style="height:800px;">
-                            <div id="map2" class="card-body">
-                              <!-- Map will be placed here. -->
-                            </div>
-                          </div>
+                        <h1 class="mt-4">world disaster</h1>
+                        <div class="card">
+                            <div id="map2" class="card-body"> </div>
+                        </div>
+                        
+                        <div class="row">
+                            {% for row in dataWD %}
+                                <div onclick="openPopup('{{ row[4] }}')">
+                                    <div class="card" style="width: 500px;">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ row[2] }}</h5>
+                                            <p class="card-text">{{ row[3] }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
                     </div>
                     <hr>
                     
                     
                     <div>
-                        <!-- <button onclick="openPopup()" style="width:130px; height:50px; padding-top: 2px">안전 공지 보기</button>
-                        <input type="button" onclick="toggleIframe_WHO()" value="WHO 최근 기사 보기" style="width:200px; height:50px; padding-top: 2px"></button>
-                        <hr>
-                         팝업 열기 버튼 -->
-                        
-
                         <!-- 팝업 -->
                         <div id="popup">
                             <span id="close" onclick="closePopup()">닫기</span>

@@ -18,7 +18,7 @@ function initMap() {
         // 마커 데이터를 반복하여 마커를 추가합니다.
         data.forEach((marker, index) => {
             var position = {lat: marker.latitude, lng: marker.longitude};
-            var title = marker.disaster;
+            var title = marker.what;
 
             // 마커를 생성합니다.
             var newMarker = new google.maps.Marker({
@@ -39,7 +39,6 @@ function initMap() {
             // 첫 번째 마커의 경우, 정보 창을 바로 엽니다.
             if (index === 0) {
                 infowindow.open(map, newMarker);
-                document.getElementById("notice").src = data[0].link
             }
         });
     });
@@ -73,19 +72,21 @@ function initMap2() {
                 title: title
             });
 
-            // 마커를 클릭하면 팝업창으로 'what' 정보를 표시합니다.
+            // google.maps.event.addListener(marker, 'click', function(i) {        
+            //     openPopup(link);
+            // });
+            
             var infowindow = new google.maps.InfoWindow({
                 content: title
             });
 
-            newMarker.addListener('click', function() {
-                infowindow.open(map, newMarker);
-            });
+            infowindow.open(map, newMarker);
 
-            // 첫 번째 마커의 경우, 정보 창을 바로 엽니다.
-            if (index === 0) {
-                infowindow.open(map, newMarker);
-            }
+
+            // // 첫 번째 마커의 경우, 정보 창을 바로 엽니다.
+            // if (index === 0) {
+            //     infowindow.open(map, newMarker);
+            // }
         });
     });
 }

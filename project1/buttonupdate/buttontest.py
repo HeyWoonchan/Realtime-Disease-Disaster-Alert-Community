@@ -16,6 +16,10 @@ DB_internal_msg = 'database.db'
 DB_external_msg = 'ForSafeTrip.db'
 DB_WHOnews = 'ExternalNews.db'
 DB_quiz = 'quiz.db'
+DB_world = 'world_disaster.db'
+
+# DB_external_msg db:: 외교부안전공지 테이블: ForSateTrip, 해외재난 테이블 - worlddisaster
+# DB_news = 네이버 뉴스 테이블: navernews
 
 last_execution_time = 0
 last_execution_time_safetrip = 0
@@ -82,6 +86,16 @@ def get_db_safetrip():
     conn.close()
     return data
 
+#세계재난정보 불러오기
+def get_db_worlddisater():
+    conn = sqlite3.connect(DB_external_msg)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM world_disaster ORDER BY id LIMIT 3")
+    data = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+    return data
 
 # 재난문자 데이터베이스 업데이트 함수
 def update_msg_db():
@@ -233,7 +247,7 @@ def update_safetrip():
     conn.close()
 
     #navernewsapi로 news db 생성
-def newsapi_dbsave() :
+def update_newsapi_naver() :
     API_KEY = "Gr03tHUOlcbECB9wsRtS"
     API_SECRET = "M3sjGHRdM_"
 
@@ -249,22 +263,22 @@ def newsapi_dbsave() :
         "[속보] 태풍",
         "[속보] 화재",
         "[속보] 산불",
-        "[속보] 산사태",
         "[속보] 감염병",
         "[속보] 정전",
         "[속보] 경계경보",
         "[속보] 공습경보",
-        "[속보] 사고"
+        "[속보] 사고",
+        "[속보] 기상청"
     ]
+    cursor.execute("DROP TABLE IF EXISTS navernews")
 
     cursor.execute('''
-    CREATE TABLE IF NOT EXISTS news (
+    CREATE TABLE IF NOT EXISTS navernews (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         pub_date TEXT,
         title TEXT,
         link TEXT,
-        disaster TEXT,
-        UNIQUE(title, link) ON CONFLICT IGNORE
+        disaster TEXT
     )
     ''')
 
@@ -286,6 +300,7 @@ def newsapi_dbsave() :
         replace_chars = {
             "<b>": "",
             "</b>": "",
+            "\';": "\'",
             "&lt;": "<",
             "&gt;": ">",
             "&nbsp;": " ",
@@ -300,19 +315,107 @@ def newsapi_dbsave() :
             for char, replacement in replace_chars.items():
                 title = title.replace(char, replacement)
             link = item['originallink']
-            date = item['pubDate']
-            parsed_date = datetime.strptime(date, "%a, %d %b %Y %H:%M:%S %z")  # 날짜 문자열을 파싱하여 datetime 객체로 변환
-            pub_date = parsed_date.strftime("%Y-%m-%d %H:%M:%S")  # 원하는 형식으로 날짜 포맷팅
+            count1 = sum(itemm[2] == link for itemm in news_list)
+            count2 = sum(itemm[1] == link for itemm in news_list)
 
-            news_list.append((pub_date, title, link, keyword[5:]))
+            if count1 == 0 and count2 ==0:
+                date = item['pubDate']
+                parsed_date = datetime.strptime(date, "%a, %d %b %Y %H:%M:%S %z")  
+                pub_date = parsed_date.strftime("%Y-%m-%d %H:%M:%S")
+                news_list.append((pub_date, title, link, keyword[5:]))
 
     news_list.sort(reverse=True)
-    cursor.executemany("INSERT INTO news (pub_date, title, link, disaster) VALUES (?, ?, ?, ?)", news_list)
+    cursor.executemany("INSERT INTO navernews (pub_date, title, link, disaster) VALUES (?, ?, ?, ?)", news_list)
 
     conn.commit()
     conn.close()
 
     print("naver news api로 db 생성 완료")
+
+#썸네일 url 반환하기
+def update_thumbnail_url():
+    conn = sqlite3.connect(DB_news)
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT title, link FROM navernews ORDER BY pub_date DESC limit 6")
+    rows = cursor.fetchall()
+    data = []
+    thumbnail_url = []
+
+    for row in rows:
+        data.append({'title': row[0], 'link': row[1]})
+
+    for item in data:
+        title = item['title']
+        link = item['link']
+        if link :
+            try:
+                news_response = requests.get(link)
+                soup = BeautifulSoup(news_response.content, 'html.parser')
+                thumbnail_meta_tag = soup.find('meta', {'property': 'og:image'})
+                thumbnail = thumbnail_meta_tag['content'] if thumbnail_meta_tag else "{{ url_for('static', filename='img/KOOMIN_img.png') }}"
+                thumbnail_url.append({'title': title, 'link': link, 'thumbnail': thumbnail})
+            except requests.exceptions.ConnectionError as e:
+                thumbnail = None  # None인 경우에도 news_list에 추가
+                thumbnail_url.append({'title': title, 'link': link, 'thumbnail': thumbnail})
+        else:
+            thumbnail = {{ url_for('static', filename='img/KOOKMIN_img.png') }}
+            thumbnail_url.append({'title': title, 'link': link, 'thumbnail': thumbnail})
+
+    # cursor.executemany("INSERT INTO thumbnail (title, link, thumbnail_url) VALUES (?, ?, ?)", thumbnail_url)
+
+    conn.commit()
+    conn.close()
+    
+    return thumbnail_url
+
+#해외재난정보 업데이트
+def update_worlddisaster():
+    url = "https://api.reliefweb.int/v1/disasters?appname=disaster-alert-page&profile=list&preset=latest&slim=1"
+
+    conn = sqlite3.connect(DB_external_msg)
+    cursor = conn.cursor()
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS world_disaster (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            created TEXT,
+            country TEXT,
+            title TEXT,
+            link TEXT,
+            disaster TEXT,
+            UNIQUE(title, link) ON CONFLICT IGNORE
+        )
+        ''')
+
+    params = {
+    "offset": 0,
+    "limit": 100,
+    "preset": "latest",
+    "profile": "list"
+    }
+
+    response = requests.get(url,params = params)
+    jdata = response.json()
+    json_data = json.loads(json.dumps(jdata))
+    data = json_data['data']
+
+    disaster_list=[]
+
+    for i in data:
+        field = i['fields']
+        created = (field['date'])['created']
+        country = ((field['country'])[0])['name']
+        title = str(field['name'])
+        disaster = ((field['type'])[0])['name']
+        link = field['url']
+
+        disaster_list.append((created, country, title, disaster, link))
+
+    cursor.executemany("INSERT INTO world_disaster (created, country, title, disaster, link) VALUES (?, ?, ?, ?, ?)", disaster_list)
+
+    conn.commit()
+    conn.close()
 
 
 #커뮤니티 페이지용
@@ -350,6 +453,7 @@ def comment():
 # 홈 페이지 경로 (GET 및 POST 메서드)
 @app.route('/', methods=['GET', 'POST'])
 def home():
+    
     global last_execution_time
     current_time = time.time()
     print(os.getcwd())
@@ -374,29 +478,33 @@ def home():
         chart_data = get_chart_data()
         conn = sqlite3.connect(DB_comment)
         c = conn.cursor()
-        c.execute("SELECT * FROM comments")
+        c.execute("SELECT * FROM comments ORDER BY id DESC LIMIT 10")
         comments = c.fetchall()
         conn.close()
         data = get_msg_db()
-        yh_news=update_news()
+        
+        news_thumbnail=update_thumbnail_url()
         data_emerg = get_msg_db_emerg()
-        nv_news=update_news_naver()
         dates = list(chart_data.keys())[::-1] 
-        return render_template('index.html', yh_news=yh_news, nv_news=nv_news ,data=data, data_emerg=data_emerg, comments=comments, chart_data=chart_data,dates=dates)
+        return render_template('index.html', news_thumbnail = news_thumbnail, data=data, data_emerg=data_emerg, comments=comments, chart_data=chart_data,dates=dates)
     
 #해외 페이지 
 @app.route('/external')
 def external():
+    update_worlddisaster()
+    update_safetrip()
     global last_execution_time_safetrip
     nowtime = time.time()
     if nowtime-last_execution_time_safetrip>60:
         last_execution_time_safetrip=nowtime
         update_safetrip()
+        update_worlddisaster()
 
-    data = get_db_safetrip()
+    data_safettrip = get_db_safetrip()
+    data_disaster = get_db_worlddisater()
 
 
-    return render_template('external.html', data = data)
+    return render_template('external.html', dataST = data_safettrip, dataWD = data_disaster)
 
 
 # 재난 메시지 업데이트를 위한 함수
@@ -415,7 +523,7 @@ def update_news():
     print(new_content)
     return new_content
 
-# 네이버 뉴스 업데이트를 위한 API 경로
+# 네이버 뉴스 업데이트를 위한 API 경우
 def update_news_naver():
     response = requests.get(url_navernews)
     soup = BeautifulSoup(response.content, 'html.parser')
@@ -473,6 +581,36 @@ def update_marker_ex():
             marker_data.append({'latitude' : address['lat'], 'longitude': address['lng'], 'what' : what, 'link':link})
     
     return jsonify(marker_data)
+
+@app.route('/update_worlddisaster')
+def update_world():
+    con = sqlite3.connect(DB_external_msg, isolation_level=None)
+    cursor = con.cursor()
+    cursor.execute('select * from world_disaster order by id asc limit 5')
+    gotdata = cursor.fetchall()
+
+    api_key = 'AIzaSyCnp17nNrPOjhrQk4Pp7HUVfMGzyqGw5eI'
+    maps = googlemaps.Client(key=api_key)
+    
+    print(gotdata)
+
+    marker_data = []
+
+    for row in gotdata:
+        where = row[2]
+        what = row[3]
+        link = row[4]
+        disaster = row[5]
+
+        results = maps.geocode(where)
+
+        for result in results:
+            address = result['geometry']['location']
+            print(address['lat'], address['lng'], what)
+            marker_data.append({'latitude' : address['lat'], 'longitude': address['lng'], 'what' : what, 'link':link, 'disaster':disaster})
+    
+    return jsonify(marker_data)
+    
     
 @app.route('/update_WHOnews')
 def update_WHOnews():
@@ -484,31 +622,46 @@ def update_WHOnews():
     print(link)
     return jsonify({'link' : link})
 
-#뉴스 페이지
-@app.route('/newspage')
-def news():
-    newsapi_dbsave()
-    global last_execution_time_safetrip
-    nowtime = time.time()
-    if nowtime-last_execution_time_safetrip>60:
-        last_execution_time_safetrip=nowtime
-        update_news_naver()
 
+def news_db_get():
     conn = sqlite3.connect('news.db')
     cursor = conn.cursor()
 
     # 데이터베이스에서 제목과 링크 조회
-    query = "SELECT id, title, link, disaster, pub_date FROM news ORDER BY pub_date DESC"
+    query = "SELECT id, title, link, disaster, pub_date FROM navernews ORDER BY pub_date DESC limit 2"
     cursor.execute(query)
     rows = cursor.fetchall()
 
     data = []
     for row in rows:
-        pub_date_str = row[4]  # pub_date를 문자열로 가져옴
-        pub_date = datetime.strptime(pub_date_str, "%Y-%m-%d %H:%M:%S") # 문자열을 datetime 객체로 변환
-        formatted_pub_date = pub_date.strftime("%Y-%m-%d %H:%M:%S")  # 원하는 형식으로 날짜 포맷팅
-        data.append({'id': row[0], 'title': row[1], 'link': row[2], 'disaster': row[3], 'pub_date': formatted_pub_date})
-    return render_template('newspage.html', data=data)
+        data.append({'id': row[0], 'title': row[1], 'link': row[2], 'disaster': row[3], 'pub_date': row[4]})
+    
+    return data[:2]
+
+#뉴스 페이지
+@app.route('/newspage')
+def news():
+    update_newsapi_naver()
+    # global last_execution_time_safetrip
+    # nowtime = time.time()
+    # if nowtime-last_execution_time_safetrip>60:
+    #     last_execution_time_safetrip=nowtime
+    #     update_newsapi_naver()
+
+    conn = sqlite3.connect(DB_news)
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT id, title, link, disaster, pub_date FROM navernews ORDER BY pub_date DESC limit 200")
+    rows = cursor.fetchall()
+
+    data = []
+    for row in rows:
+        data.append({'id': row[0], 'title': row[1], 'link': row[2], 'disaster': row[3], 'pub_date': row[4]})
+    
+    thumnail = update_thumbnail_url()
+    print(thumnail)
+
+    return render_template('newspage.html', data=data, thumnail = thumnail)
 
 
 #커뮤니티 페이지 전용 ----------------
@@ -596,31 +749,29 @@ def get_random_quiz():
     connection = sqlite3.connect('quiz.db')
     cursor = connection.cursor()
     cursor.execute('SELECT content, type, subtype, answer FROM quiz')
+
     all_quizzes = cursor.fetchall()
-    connection.close()
+    num_quizzes = len(all_quizzes)
 
     random_quizzes = []
-    for index in range(1, 6):
-        random_index = random.randint(0, len(all_quizzes) - 1)
-        random_quiz = all_quizzes[random_index]
-        content = random_quiz[0]
-        quiz_type = random_quiz[1]
-        subtype = random_quiz[2]
+    for index in range(1, 6):  # 1부터 5까지의 범위로 변경
+        random_index = random.randint(0, num_quizzes - 1)
+        random_quiz = all_quizzes[random_index]  # 모든 값을 가져옴
         answer = random_quiz[3]
-
-        answer_value = 1 if answer == '참' else 0
-
+        if answer == '참':
+            answer_value = 1
+        else:
+            answer_value = 0
         quiz_dict = {
             'number': index,
-            'type': quiz_type,
-            'subtype': subtype,
-            'content': content,
+            'type': random_quiz[1],
+            'subtype': random_quiz[2],
+            'content': random_quiz[0],
             'answer': answer_value
         }
         random_quizzes.append(quiz_dict)
 
-        all_quizzes.pop(random_index)  # 선택한 퀴즈를 제거하여 중복 선택 방지
-
+    connection.close()
     return random_quizzes
 
 @app.route('/quiz')
@@ -630,39 +781,22 @@ def quiz():
 @app.route('/quiz/start')
 def quiz_start():
     quizzes = get_random_quiz()
-    return render_template('quizstart.html', quizzes=quizzes)
+    return render_template('quizstart.html',quizzes=quizzes)
 
-# @app.route('/quiz/start/submit', methods=['POST'])
-# def quiz_result():
-#     correct = 0
-#     incorrect = 0
-#     quizzes = get_random_quiz()
 
-#     for i in range(1, 6):
-#         selected_answer = int(request.form['answer{}'.format(i)])
-#         quiz = quizzes[i-1]
-#         if selected_answer == quiz['answer']:
-#             correct += 1
-#         else:
-#             incorrect += 1
+@app.route('/quiz/start/submit')
+def quiz_result():
+    return render_template('result.html')
 
-#     return redirect(url_for('result', correct=correct, incorrect=incorrect))
-
-@app.route('/quiz/result')
-def result():
-    correct = int(request.args.get('correct', 0))
-    incorrect = int(request.args.get('incorrect', 0))
-    return render_template('result.html', correct=correct, incorrect=incorrect)
-
-@app.route('/quiz/restart')
+@app.route('/quiz/start/submit/result/restart')
 def quiz_restart():
-    return redirect(url_for('quiz'))
-
+    return redirect('/quiz')
 
 # 애플리케이션 실행
 if __name__ == "__main__":
     #os.chdir("project1/buttonupdate")
+    os.path.dirname(os.path.abspath(__file__))
     with app.app_context():
         db.create_all()
     create_table()
-    app.run(host='localhost', port=7000)
+    app.run(host='localhost', port=8023)

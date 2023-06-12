@@ -1,8 +1,8 @@
 var locations = {};
-
+var map;
 function initMap() {
     // Google Maps 지도 인스턴스 생성 (기본 위치는 임의로 설정합니다. 이후에 수정될 것입니다.)
-    var map = new google.maps.Map(document.getElementById('map'), {
+    map = new google.maps.Map(document.getElementById('map'), {
         center: {lat: 37.27538, lng: 127.05488},
         zoom: 10
     });
@@ -51,7 +51,7 @@ function initMap() {
 function moveToLocation(id) {
     var location = locations[id];
     if (location) {
-        map.setCenter(location);
+        map.panTo(location);
     }
 }
 
@@ -68,3 +68,29 @@ document.getElementById("toggle-button").addEventListener("click", function() {
         sidebar.classList.add("hidden");
     }
 });
+
+let isExpanded = false;
+
+function displayComments(comments, limit) {
+    let commentList = document.getElementById('commentList');
+    commentList.innerHTML = '';
+
+    for (let i = 0; i < Math.min(limit, comments.length); i++) {
+        let comment = comments[i];
+        commentList.innerHTML += `<li>${comment[1]}: ${comment[2]}</li>`;
+    }
+}
+
+function toggleCard() {
+    if (!isExpanded) {
+        displayComments(comments, 10);
+        commentList.innerHTML += '<form method="POST" action="/" onclick="event.stopPropagation();"><input type="text" name="name" placeholder="이름"><br><textarea name="comment" placeholder="댓글"></textarea><br><input type="submit" value="등록"></form>';
+        isExpanded = true;
+    } else {
+        displayComments(comments, 4);
+        isExpanded = false;
+    }
+}
+
+// 처음에는 4개의 댓글만 표시
+displayComments(comments, 4);

@@ -455,15 +455,14 @@ def home():
         chart_data = get_chart_data()
         conn = sqlite3.connect(DB_comment)
         c = conn.cursor()
-        c.execute("SELECT * FROM comments")
+        c.execute("SELECT * FROM comments ORDER BY id DESC LIMIT 10")
         comments = c.fetchall()
         conn.close()
         data = get_msg_db()
-        yh_news=update_news()
+        news=news_db_get()
         data_emerg = get_msg_db_emerg()
-        nv_news=update_news_naver()
         dates = list(chart_data.keys())[::-1] 
-        return render_template('index.html', yh_news=yh_news, nv_news=nv_news ,data=data, data_emerg=data_emerg, comments=comments, chart_data=chart_data,dates=dates)
+        return render_template('index.html', news=news,data=data, data_emerg=data_emerg, comments=comments, chart_data=chart_data,dates=dates)
     
 #해외 페이지 
 @app.route('/external')
@@ -599,6 +598,24 @@ def update_WHOnews():
     print(link)
     return jsonify({'link' : link})
 
+
+def news_db_get():
+    conn = sqlite3.connect('news.db')
+    cursor = conn.cursor()
+
+    # 데이터베이스에서 제목과 링크 조회
+    query = "SELECT id, title, link, disaster, pub_date FROM news ORDER BY pub_date DESC"
+    cursor.execute(query)
+    rows = cursor.fetchall()
+
+    data = []
+    for row in rows:
+        pub_date_str = row[4]  # pub_date를 문자열로 가져옴
+        pub_date = datetime.strptime(pub_date_str, "%Y-%m-%d %H:%M:%S") # 문자열을 datetime 객체로 변환
+        formatted_pub_date = pub_date.strftime("%Y-%m-%d %H:%M:%S")  # 원하는 형식으로 날짜 포맷팅
+        data.append({'id': row[0], 'title': row[1], 'link': row[2], 'disaster': row[3], 'pub_date': formatted_pub_date})
+    return data[:2]
+
 #뉴스 페이지
 @app.route('/newspage')
 def news():
@@ -706,20 +723,31 @@ def comment_post(post_id):
 def get_random_quiz():
     connection = sqlite3.connect('quiz.db')
     cursor = connection.cursor()
-    cursor.execute('SELECT content FROM quiz')
+    cursor.execute('SELECT content, type, subtype, answer FROM quiz')
 
     all_quizzes = cursor.fetchall()
     num_quizzes = len(all_quizzes)
 
     random_quizzes = []
-    for _ in range(10):
+    for index in range(1, 6):  # 1부터 5까지의 범위로 변경
         random_index = random.randint(0, num_quizzes - 1)
-        random_quizz = all_quizzes[random_index][0]  # content 값을 가져옴
-        random_quizzes.append(random_quizz)
+        random_quiz = all_quizzes[random_index]  # 모든 값을 가져옴
+        answer = random_quiz[3]
+        if answer == '참':
+            answer_value = 1
+        else:
+            answer_value = 0
+        quiz_dict = {
+            'number': index,
+            'type': random_quiz[1],
+            'subtype': random_quiz[2],
+            'content': random_quiz[0],
+            'answer': answer_value
+        }
+        random_quizzes.append(quiz_dict)
 
     connection.close()
     return random_quizzes
-
 
 @app.route('/quiz')
 def quiz():

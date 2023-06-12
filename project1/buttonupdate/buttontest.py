@@ -482,10 +482,11 @@ def home():
         comments = c.fetchall()
         conn.close()
         data = get_msg_db()
-        news=news_db_get()
+        
+        news_thumbnail=update_thumbnail_url()
         data_emerg = get_msg_db_emerg()
         dates = list(chart_data.keys())[::-1] 
-        return render_template('index.html', news=news,data=data, data_emerg=data_emerg, comments=comments, chart_data=chart_data,dates=dates)
+        return render_template('index.html', news_thumbnail = news_thumbnail, data=data, data_emerg=data_emerg, comments=comments, chart_data=chart_data,dates=dates)
     
 #해외 페이지 
 @app.route('/external')
@@ -522,7 +523,7 @@ def update_news():
     print(new_content)
     return new_content
 
-# 네이버 뉴스 업데이트를 위한 API 경로
+# 네이버 뉴스 업데이트를 위한 API 경우
 def update_news_naver():
     response = requests.get(url_navernews)
     soup = BeautifulSoup(response.content, 'html.parser')
@@ -627,16 +628,14 @@ def news_db_get():
     cursor = conn.cursor()
 
     # 데이터베이스에서 제목과 링크 조회
-    query = "SELECT id, title, link, disaster, pub_date FROM news ORDER BY pub_date DESC"
+    query = "SELECT id, title, link, disaster, pub_date FROM navernews ORDER BY pub_date DESC limit 2"
     cursor.execute(query)
     rows = cursor.fetchall()
 
     data = []
     for row in rows:
-        pub_date_str = row[4]  # pub_date를 문자열로 가져옴
-        pub_date = datetime.strptime(pub_date_str, "%Y-%m-%d %H:%M:%S") # 문자열을 datetime 객체로 변환
-        formatted_pub_date = pub_date.strftime("%Y-%m-%d %H:%M:%S")  # 원하는 형식으로 날짜 포맷팅
-        data.append({'id': row[0], 'title': row[1], 'link': row[2], 'disaster': row[3], 'pub_date': formatted_pub_date})
+        data.append({'id': row[0], 'title': row[1], 'link': row[2], 'disaster': row[3], 'pub_date': row[4]})
+    
     return data[:2]
 
 #뉴스 페이지
@@ -795,9 +794,9 @@ def quiz_restart():
 
 # 애플리케이션 실행
 if __name__ == "__main__":
-    # os.chdir("project1/buttonupdate")
+    #os.chdir("project1/buttonupdate")
     os.path.dirname(os.path.abspath(__file__))
     with app.app_context():
         db.create_all()
     create_table()
-    app.run(host='localhost', port=8033)
+    app.run(host='localhost', port=8023)

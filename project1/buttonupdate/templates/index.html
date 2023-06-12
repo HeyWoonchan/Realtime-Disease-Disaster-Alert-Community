@@ -207,10 +207,10 @@
                         </div>
                         <br>
                         <div class="row">
-                        {% for item in news %}
+                        {% for item in news_thumbnail[:2] %}
                         <div class="col-md-6">
                             <div class="card" onclick="location.href='/newspage'" style="width: 270px; height: 300px;">
-                                <img src="{{ url_for('static', filename='img/쿠민.jpg') }}" class="card-img-top" style="height: 70%;">
+                                <img src="{{ item.thumbnail }}" class="card-img-top" style="height: 70%;">
                                 <div class="card-body" style="height: 30%;"> 
                                     <p class="card-text">{{ item.title }}</p>
                                 </div>

@@ -263,7 +263,6 @@ def update_newsapi_naver() :
         "[속보] 태풍",
         "[속보] 화재",
         "[속보] 산불",
-        "[속보] 산사태",
         "[속보] 감염병",
         "[속보] 정전",
         "[속보] 경계경보",
@@ -279,9 +278,7 @@ def update_newsapi_naver() :
         pub_date TEXT,
         title TEXT,
         link TEXT,
-        disaster TEXT,
-        thumbnail TEXT,
-        UNIQUE(title, link) ON CONFLICT IGNORE
+        disaster TEXT
     )
     ''')
 
@@ -303,6 +300,7 @@ def update_newsapi_naver() :
         replace_chars = {
             "<b>": "",
             "</b>": "",
+            "\';": "\'",
             "&lt;": "<",
             "&gt;": ">",
             "&nbsp;": " ",
@@ -317,34 +315,59 @@ def update_newsapi_naver() :
             for char, replacement in replace_chars.items():
                 title = title.replace(char, replacement)
             link = item['originallink']
-            if not link:  
-                continue
-            date = item['pubDate']
-            parsed_date = datetime.strptime(date, "%a, %d %b %Y %H:%M:%S %z")  
-            pub_date = parsed_date.strftime("%Y-%m-%d %H:%M:%S")  
-            try:
-                news_response = requests.get(link)
-                soup = BeautifulSoup(news_response.content, 'html.parser')
-                thumbnail_meta_tag = soup.find('meta', {'property': 'og:image'})
-                thumbnail = thumbnail_meta_tag['content'] if thumbnail_meta_tag else None
-                news_list.append((pub_date, title, link, keyword[5:], thumbnail))
-                
-            except requests.exceptions.ConnectionError as e:
-                # 오류 처리 로직 추가
-                thumbnail = None  # None인 경우에도 news_list에 추가
-                news_list.append((pub_date, title, link, keyword[5:], thumbnail))
-                print("Connection Error:", e)
-                continue  # 다음 뉴스 기사로 넘어감
-        print(keyword + " 완료")
-            
+            count1 = sum(itemm[2] == link for itemm in news_list)
+            count2 = sum(itemm[1] == link for itemm in news_list)
+
+            if count1 == 0 and count2 ==0:
+                date = item['pubDate']
+                parsed_date = datetime.strptime(date, "%a, %d %b %Y %H:%M:%S %z")  
+                pub_date = parsed_date.strftime("%Y-%m-%d %H:%M:%S")
+                news_list.append((pub_date, title, link, keyword[5:]))
 
     news_list.sort(reverse=True)
-    cursor.executemany("INSERT INTO navernews (pub_date, title, link, disaster, thumbnail) VALUES (?, ?, ?, ?, ?)", news_list)
+    cursor.executemany("INSERT INTO navernews (pub_date, title, link, disaster) VALUES (?, ?, ?, ?)", news_list)
 
     conn.commit()
     conn.close()
 
     print("naver news api로 db 생성 완료")
+
+#썸네일 url 반환하기
+def update_thumbnail_url():
+    conn = sqlite3.connect(DB_news)
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT title, link FROM navernews ORDER BY pub_date DESC limit 6")
+    rows = cursor.fetchall()
+    data = []
+    thumbnail_url = []
+
+    for row in rows:
+        data.append({'title': row[0], 'link': row[1]})
+
+    for item in data:
+        title = item['title']
+        link = item['link']
+        if link :
+            try:
+                news_response = requests.get(link)
+                soup = BeautifulSoup(news_response.content, 'html.parser')
+                thumbnail_meta_tag = soup.find('meta', {'property': 'og:image'})
+                thumbnail = thumbnail_meta_tag['content'] if thumbnail_meta_tag else "{{ url_for('static', filename='img/KOOMIN_img.png') }}"
+                thumbnail_url.append({'title': title, 'link': link, 'thumbnail': thumbnail})
+            except requests.exceptions.ConnectionError as e:
+                thumbnail = None  # None인 경우에도 news_list에 추가
+                thumbnail_url.append({'title': title, 'link': link, 'thumbnail': thumbnail})
+        else:
+            thumbnail = {{ url_for('static', filename='img/KOOKMIN_img.png') }}
+            thumbnail_url.append({'title': title, 'link': link, 'thumbnail': thumbnail})
+
+    # cursor.executemany("INSERT INTO thumbnail (title, link, thumbnail_url) VALUES (?, ?, ?)", thumbnail_url)
+
+    conn.commit()
+    conn.close()
+    
+    return thumbnail_url
 
 #해외재난정보 업데이트
 def update_worlddisaster():
@@ -629,14 +652,17 @@ def news():
     conn = sqlite3.connect(DB_news)
     cursor = conn.cursor()
 
-    cursor.execute("SELECT id, title, link, disaster, pub_date, thumbnail FROM navernews ORDER BY pub_date DESC limit 50")
+    cursor.execute("SELECT id, title, link, disaster, pub_date FROM navernews ORDER BY pub_date DESC limit 200")
     rows = cursor.fetchall()
 
     data = []
     for row in rows:
-        data.append({'id': row[0], 'title': row[1], 'link': row[2], 'disaster': row[3], 'pub_date': row[4], 'thumbnail': row[5]})
+        data.append({'id': row[0], 'title': row[1], 'link': row[2], 'disaster': row[3], 'pub_date': row[4]})
+    
+    thumnail = update_thumbnail_url()
+    print(thumnail)
 
-    return render_template('newspage.html', data=data)
+    return render_template('newspage.html', data=data, thumnail = thumnail)
 
 
 #커뮤니티 페이지 전용 ----------------

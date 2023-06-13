@@ -10,13 +10,12 @@ from wtforms.validators import DataRequired
 
 
 # 데이터베이스 파일 이름
-DB_comment = 'comments.db'
-DB_news = 'news.db'
-DB_internal_msg = 'database.db'
-DB_external_msg = 'ForSafeTrip.db'
-DB_WHOnews = 'ExternalNews.db'
+DB_disaster = 'disaster_merged.db'
+DB_news_merged = 'news_merged.db'
+
+DB_comment = 'community.db'
 DB_quiz = 'quiz.db'
-DB_world = 'world_disaster.db'
+
 
 #주소 변수 모음
 url_news = "https://www.yna.co.kr/theme/breaknews-history"
@@ -41,11 +40,11 @@ last_execution_time_safetrip = 0
 #재난문자 type으로 차트를 생성
 def get_chart_data():
     # SQLite 데이터베이스 연결
-    conn = sqlite3.connect(DB_internal_msg)
+    conn = sqlite3.connect(DB_disaster)
     cursor = conn.cursor()
 
     # 최근 5일의 데이터 조회
-    cursor.execute("SELECT DISTINCT create_date FROM my_table ORDER BY create_date DESC LIMIT 50")
+    cursor.execute("SELECT DISTINCT create_date FROM korean_disaster ORDER BY create_date DESC LIMIT 50")
     dates = cursor.fetchall()
     dates = [date[0].split()[0] for date in dates]
 
@@ -55,7 +54,7 @@ def get_chart_data():
         chart_data[date] = {'undefined': 0, 'missing': 0, 'disaster': 0}
 
     for date in chart_data.keys():
-        cursor.execute(f"SELECT type, COUNT(*) FROM my_table WHERE create_date LIKE '{date}%' GROUP BY type")
+        cursor.execute(f"SELECT type, COUNT(*) FROM korean_disaster WHERE create_date LIKE '{date}%' GROUP BY type")
         rows = cursor.fetchall()
         for row in rows:
             chart_data[date][row[0]] = row[1]
@@ -68,10 +67,10 @@ def get_chart_data():
 
 # 재난문자 데이터베이스에서 데이터 가져오는 함수
 def get_msg_db():
-    conn = sqlite3.connect(DB_internal_msg)
+    conn = sqlite3.connect(DB_disaster)
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM my_table ORDER BY create_date DESC LIMIT 3")
+    cursor.execute("SELECT * FROM korean_disaster ORDER BY create_date DESC LIMIT 3")
     data = cursor.fetchall()
 
     cursor.close()
@@ -80,9 +79,9 @@ def get_msg_db():
 
 #재난문자 db에서 긴급문자만 불러오기
 def get_msg_db_emerg():
-    conn = sqlite3.connect(DB_internal_msg)
+    conn = sqlite3.connect(DB_disaster)
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM my_table WHERE type IN ('disaster', 'emergency') ORDER BY create_date DESC LIMIT 3")
+    cursor.execute("SELECT * FROM korean_disaster WHERE type IN ('disaster', 'emergency') ORDER BY create_date DESC LIMIT 3")
     data = cursor.fetchall()
 
     cursor.close()
@@ -94,10 +93,10 @@ def update_msg_db():
     response = requests.get(url_api)
     jdata = response.json()
     json_data = json.loads(json.dumps(jdata))
-    conn = sqlite3.connect(DB_internal_msg)
+    conn = sqlite3.connect(DB_disaster)
     cursor = conn.cursor()
 
-    cursor.execute('''CREATE TABLE IF NOT EXISTS my_table (
+    cursor.execute('''CREATE TABLE IF NOT EXISTS korean_disaster (
                         create_date TEXT,
                         location_name TEXT,
                         msg TEXT,
@@ -124,14 +123,14 @@ def update_msg_db():
         else:
             msg_type = 'undefined'
 
-        cursor.execute("SELECT * FROM my_table WHERE create_date = ? AND location_name = ? AND msg = ?",
+        cursor.execute("SELECT * FROM korean_disaster WHERE create_date = ? AND location_name = ? AND msg = ?",
                     (create_date, location_name, msg))
         existing_data = cursor.fetchone()
 
         if existing_data:
             print("Data already exists in the database.")
         else:
-            cursor.execute("INSERT INTO my_table (create_date, location_name, msg, type) VALUES (?, ?, ?, ?)",
+            cursor.execute("INSERT INTO korean_disaster (create_date, location_name, msg, type) VALUES (?, ?, ?, ?)",
                         (create_date, location_name, msg, msg_type))
             conn.commit()
             print("Data added to the database.")
@@ -143,7 +142,7 @@ def update_msg_db():
 def create_table():
     conn = sqlite3.connect(DB_comment)
     c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS comments (
+    c.execute('''CREATE TABLE IF NOT EXISTS comment_mainpage (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     name TEXT NOT NULL,
                     content TEXT NOT NULL
@@ -151,9 +150,9 @@ def create_table():
     conn.commit()
     conn.close()
 
-    conn = sqlite3.connect(DB_internal_msg)
+    conn = sqlite3.connect(DB_disaster)
     c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS my_table (
+    c.execute('''CREATE TABLE IF NOT EXISTS korean_disaster (
                     create_date TEXT,
                     location_name TEXT,
                     msg TEXT,
@@ -167,7 +166,7 @@ def create_table():
 
 #해외안전정보 불러오기
 def get_db_safetrip():
-    conn = sqlite3.connect(DB_external_msg)
+    conn = sqlite3.connect(DB_news_merged)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM ForSafeTrip ORDER BY id LIMIT 3")
     data = cursor.fetchall()
@@ -178,7 +177,7 @@ def get_db_safetrip():
 
 #세계재난정보 불러오기
 def get_db_worlddisater():
-    conn = sqlite3.connect(DB_external_msg)
+    conn = sqlite3.connect(DB_disaster)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM world_disaster ORDER BY id LIMIT 3")
     data = cursor.fetchall()
@@ -189,7 +188,7 @@ def get_db_worlddisater():
 
 #외교부 안전공지 불러오기 로직
 def update_safetrip():
-    conn = sqlite3.connect('ForSafeTrip.db')
+    conn = sqlite3.connect(DB_news_merged)
     cursor = conn.cursor()
 
     cursor.execute('DELETE FROM ForSafeTrip')
@@ -257,7 +256,7 @@ def update_safetrip():
 def update_worlddisaster():
     url = "https://api.reliefweb.int/v1/disasters?appname=disaster-alert-page&profile=list&preset=latest&slim=1"
 
-    conn = sqlite3.connect(DB_external_msg)
+    conn = sqlite3.connect(DB_disaster)
     cursor = conn.cursor()
 
     cursor.execute('''
@@ -308,7 +307,7 @@ def update_newsapi_naver() :
     API_KEY = "Gr03tHUOlcbECB9wsRtS"
     API_SECRET = "M3sjGHRdM_"
 
-    conn = sqlite3.connect("news.db")
+    conn = sqlite3.connect(DB_news_merged)
     cursor = conn.cursor()
 
     news_keywords = [
@@ -391,7 +390,7 @@ def update_newsapi_naver() :
 
 #썸네일 url 반환하기
 def update_thumbnail_url():
-    conn = sqlite3.connect(DB_news)
+    conn = sqlite3.connect(DB_news_merged)
     cursor = conn.cursor()
 
     cursor.execute("SELECT title, link FROM navernews ORDER BY pub_date DESC limit 6")
@@ -477,7 +476,7 @@ def get_random_quiz():
 
 #커뮤니티 페이지용
 app.config['SECRET_KEY'] = 'mysecretkey1232'
-db_path = os.path.join(os.path.dirname(__file__), 'test.db')
+db_path = os.path.join(os.path.dirname(__file__), 'community.db')
 db_uri = 'sqlite:///{}'.format(db_path)
 app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 db = SQLAlchemy(app)
@@ -497,14 +496,14 @@ def comment():
         if name and comment:
             conn = sqlite3.connect(DB_comment)
             c = conn.cursor()
-            c.execute("INSERT INTO comments (name, content) VALUES (?, ?)", (name, comment))
+            c.execute("INSERT INTO comment_mainpage (name, content) VALUES (?, ?)", (name, comment))
             conn.commit()
             conn.close()
             return redirect('/')
     else:
         conn = sqlite3.connect(DB_comment)
         c = conn.cursor()
-        c.execute("SELECT * FROM comments")
+        c.execute("SELECT * FROM comment_mainpage")
         comments = c.fetchall()
         conn.close()
         data = get_msg_db()
@@ -524,7 +523,7 @@ def home():
         if name and comment:
             conn = sqlite3.connect(DB_comment)
             c = conn.cursor()
-            c.execute("INSERT INTO comments (name, content) VALUES (?, ?)", (name, comment))
+            c.execute("INSERT INTO comment_mainpage (name, content) VALUES (?, ?)", (name, comment))
             conn.commit()
             conn.close()
             return redirect('/')
@@ -538,7 +537,7 @@ def home():
         chart_data = get_chart_data()
         conn = sqlite3.connect(DB_comment)
         c = conn.cursor()
-        c.execute("SELECT * FROM comments ORDER BY id DESC LIMIT 10")
+        c.execute("SELECT * FROM comment_mainpage ORDER BY id DESC LIMIT 10")
         comments = c.fetchall()
         conn.close()
         data = get_msg_db()
@@ -580,9 +579,9 @@ def get_disaster_messages():
 
 @app.route('/update_marker_internal')
 def update_marker_in():
-    con = sqlite3.connect(DB_internal_msg, isolation_level=None)
+    con = sqlite3.connect(DB_disaster, isolation_level=None)
     cursor = con.cursor()
-    cursor.execute('select * from my_table order by create_date desc limit 3')
+    cursor.execute('select * from korean_disaster order by create_date desc limit 3')
     gotdata = cursor.fetchall()
 
     api_key = 'AIzaSyCnp17nNrPOjhrQk4Pp7HUVfMGzyqGw5eI'
@@ -606,7 +605,7 @@ def update_marker_in():
 # 해외 안전 정보 업데이트를 위한 API 경로
 @app.route('/update_external')
 def update_marker_ex():
-    con = sqlite3.connect(DB_external_msg, isolation_level=None)
+    con = sqlite3.connect(DB_news_merged, isolation_level=None)
     cursor = con.cursor()
     cursor.execute('select * from ForSafeTrip order by id asc limit 3')
     gotdata = cursor.fetchall()
@@ -629,7 +628,7 @@ def update_marker_ex():
 
 @app.route('/update_worlddisaster')
 def update_world():
-    con = sqlite3.connect(DB_external_msg, isolation_level=None)
+    con = sqlite3.connect(DB_disaster, isolation_level=None)
     cursor = con.cursor()
     cursor.execute('select * from world_disaster order by id asc limit 5')
     gotdata = cursor.fetchall()
@@ -657,19 +656,9 @@ def update_world():
     return jsonify(marker_data)
     
     
-@app.route('/update_WHOnews')
-def update_WHOnews():
-    con = sqlite3.connect(DB_WHOnews, isolation_level=None)
-    cursor = con.cursor()
-    cursor.execute('select link from ExternalNews order by id asc limit 1')
-    link = cursor.fetchone()
-
-    print(link)
-    return jsonify({'link' : link})
-
 
 def news_db_get():
-    conn = sqlite3.connect('news.db')
+    conn = sqlite3.connect(DB_news_merged)
     cursor = conn.cursor()
 
     # 데이터베이스에서 제목과 링크 조회
@@ -693,7 +682,7 @@ def news():
     #     last_execution_time_safetrip=nowtime
     #     update_newsapi_naver()
 
-    conn = sqlite3.connect(DB_news)
+    conn = sqlite3.connect(DB_news_merged)
     cursor = conn.cursor()
 
     cursor.execute("SELECT id, title, link, disaster, pub_date FROM navernews ORDER BY pub_date DESC limit 200")
@@ -819,4 +808,4 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
     create_table()
-    app.run(host='localhost', port=8023)
+    app.run(host='localhost', port=5001)

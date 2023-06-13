@@ -311,20 +311,21 @@ def update_newsapi_naver() :
     cursor = conn.cursor()
 
     news_keywords = [
-        "[속보] 풍수해",
-        "[속보] 산사태",
-        "[속보] 폭염",
-        "[속보] 호우",
-        "[속보] 지진",
-        "[속보] 태풍",
-        "[속보] 화재",
-        "[속보] 산불",
-        "[속보] 감염병",
-        "[속보] 정전",
-        "[속보] 경계경보",
-        "[속보] 공습경보",
-        "[속보] 사고",
-        "[속보] 기상청"
+        "\"완주군\" \"지진\""
+        # "[속보] 풍수해",
+        # "[속보] 산사태",
+        # "[속보] 폭염",
+        # "[속보] 호우",
+        # "[속보] 지진",
+        # "[속보] 태풍",
+        # "[속보] 화재",
+        # "[속보] 산불",
+        # "[속보] 감염병",
+        # "[속보] 정전",
+        # "[속보] 경계경보",
+        # "[속보] 공습경보",
+        # "[속보] 사고",
+        # "[속보] 기상청"
     ]
     cursor.execute("DROP TABLE IF EXISTS navernews")
 
@@ -348,7 +349,7 @@ def update_newsapi_naver() :
         }
         params = {
             "query": query,
-            "display": 30  # 가져올 뉴스 개수
+            "display": 100  # 가져올 뉴스 개수
         }
         response = requests.get(url_navernewsapi, headers=headers, params=params)
         data = response.json()
@@ -675,7 +676,7 @@ def news_db_get():
 #뉴스 페이지
 @app.route('/newspage')
 def news():
-    update_newsapi_naver()
+    # update_newsapi_naver()
     # global last_execution_time_safetrip
     # nowtime = time.time()
     # if nowtime-last_execution_time_safetrip>60:
@@ -685,7 +686,7 @@ def news():
     conn = sqlite3.connect(DB_news_merged)
     cursor = conn.cursor()
 
-    cursor.execute("SELECT id, title, link, disaster, pub_date FROM navernews ORDER BY pub_date DESC limit 200")
+    cursor.execute("SELECT id, title, link, disaster, pub_date FROM navernews ORDER BY pub_date DESC ")
     rows = cursor.fetchall()
 
     data = []

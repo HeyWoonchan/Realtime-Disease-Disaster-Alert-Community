@@ -783,10 +783,55 @@ def quiz_start():
     quizzes = get_random_quiz()
     return render_template('quizstart.html',quizzes=quizzes)
 
-
-@app.route('/quiz/start/submit')
+@app.route('/quiz/result', methods=['GET', 'POST'])
 def quiz_result():
+    correct_count = 0
+    incorrect_count = 0
+    selected_quiz_ids = request.args.getlist('quiz')
+
+    connection = sqlite3.connect('quiz.db')
+    cursor = connection.cursor()
+
+    incorrect_quizzes = []
+    correct_quizzes = []
+
+    for quiz_id in selected_quiz_ids:
+        cursor.execute('SELECT content, answer, type, subtype FROM quiz WHERE id = ?', (quiz_id,))
+        quiz = cursor.fetchone()
+        quiz_content = quiz[0]
+        quiz_answer = quiz[1]
+        quiz_type = quiz[2]
+        quiz_subtype = quiz[3]
+
+        if quiz_answer == '참':
+            answer_value = 1
+        else:
+            answer_value = 0
+
+        if answer_value == 0:
+            incorrect_quizzes.append({
+                'content': quiz_content,
+                'type': quiz_type,
+                'subtype': quiz_subtype
+            })
+            incorrect_count += 1
+        else:
+            correct_quizzes.append({
+                'content': quiz_content,
+                'type': quiz_type,
+                'subtype': quiz_subtype
+            })
+            correct_count += 1
+
+    connection.close()
+
+    return render_template('result.html', correct_count=correct_count, incorrect_count=incorrect_count,
+                           incorrect_quizzes=incorrect_quizzes, correct_quizzes=correct_quizzes)
+
+@app.route('/quiz/start/submit', methods=['POST'])
+def quiz_submit():
     return render_template('result.html')
+
 
 @app.route('/quiz/start/submit/result/restart')
 def quiz_restart():

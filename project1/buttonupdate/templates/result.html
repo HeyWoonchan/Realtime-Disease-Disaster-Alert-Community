@@ -12,73 +12,117 @@
     <!-- Custom styles -->
     <style>
     body {
-        text-align: center;
-        background-color: white;
-    }
-    .title {
-        width: 100%;
-        border-radius: 15px;
-        font-size: 30px;
-        height: 50px;
-    }
-    .bttn {
-        border-radius: 10px;
-        width: fit-content;
-        min-width: 150px;
-        height: fit-content;
-        min-height: 70px;
-        text-align: center;
-        background-color: white;
-        font-size: 20px;
-        margin-top: 10px;
-        margin-bottom: 20px;
-        border: 1px solid black;
-        color: black;
-        padding: 10px;
-        text-decoration: none;
-    }
-    .game {
-        margin: 0 auto;
-        width: calc(60vw - 10px); /* Subtracting 10px to account for the difference */
-        padding: 50px 20px;
-        border: 1px solid black;
-        border-radius: 15px;
-        background-color: whitesmoke;
-        min-height: 50vh;
-    }
-    .result {
-        width: 100%;
-        border: 1px solid black;
-        margin-bottom: 20px;
-        border-radius: 15px;
-        background-color: white;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-        font-size: 20px;
-        margin-bottom: 20px;
-        height: 100vh;
-    }
-    .button {
-        background-color:  rgb(48, 93, 229);
-        margin-top: 30px;
-        margin-bottom: 10px;
-        border-radius: 10px;
-        padding: 10px 20px;
-        border: none;
-        outline: none;
-        color: white;
-    }
-    .button:hover {
-        cursor: pointer;
-    }
+    text-align: center;
+    background-color: white;
+}
 
-    .game-buttons {
-        display: flex;
-        justify-content: space-evenly;
-        margin-top: 20px;
+.title {
+    width: 100%;
+    border-radius: 15px;
+    font-size: 30px;
+    margin-bottom: 40px;
+}
+
+.bttn {
+    border-radius: 10px;
+    width: fit-content;
+    min-width: 150px;
+    height: fit-content;
+    min-height: 70px;
+    text-align: center;
+    background-color: white;
+    font-size: 20px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    border: 1px solid black;
+    color: black;
+    padding: 10px;
+    text-decoration: none;
+}
+
+.game {
+    margin-top : 20px;
+    margin-bottom :20px;
+    margin-left:auto;
+    margin-right:auto;
+    width: calc(60vw - 10px);
+    padding: 50px 20px;
+    border-radius: 15px;
+    background-color: whitesmoke;
+    min-height: 50vh;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+    border: none;
+}
+
+.score {
+    font-size: 30px;
+}
+
+.result {
+    width: 100%;
+    border: 1px solid black;
+    margin-bottom: 20px;
+    border-radius: 15px;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-size: 20px;
+    margin-bottom: 20px;
+    height: 100vh;
+}
+
+.button {
+    background-color: rgb(48, 93, 229);
+    margin-top: 30px;
+    margin-bottom: 5px;
+    border-radius: 10px;
+    padding: 10px 20px;
+    border: none;
+    outline: none;
+    color: white;
+}
+
+.button:hover {
+    cursor: pointer;
+}
+
+.game-buttons {
+    display: flex;
+    justify-content: space-evenly;
+    margin-top: 20px;
+}
+
+.state {
+    font-size: 25px;
+}
+
+.message {
+    font-size: 20px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    animation: blink-animation 1.5s infinite;
+}
+.msg{
+    font-size : 30px;
+    margin-top :10px;
+    margin-bottom : 10px;
+    font-style :italic;
+}
+
+@keyframes blink-animation {
+    0% {
+        opacity: 1;
     }
+    50% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
 </style>
 </head>
 <body>
@@ -124,47 +168,50 @@
         </nav>
         <div class="container-fluid">
             <div class="game">
-                <div class="title">당신의 점수는?!</div>
-                &nbsp;&nbsp;
+                <div class="title">과연 쿠민이의 운명은?!</div>
                 <div class="result">
-                    <div class="score">&nbsp;&nbsp;&nbsp;</div>
-                    <div class="score">맞은 개수: {{ request.args.get('correct', 0) }}개</div>
-                    <div class="score">&nbsp;&nbsp;&nbsp;</div>
-                    <div class="score">틀린 개수: {{ request.args.get('incorrect', 0) }}개</div>
-                    <div class="score">&nbsp;&nbsp;&nbsp;</div>
+                    <div class="score">
+                        정답 : {{ request.args.get('correct', 0) }}개 &nbsp;&nbsp;&nbsp;
+                        오답 : {{ request.args.get('incorrect', 0) }}개
+                    </div>
+                    &nbsp;&nbsp;&nbsp;
                     {% if request.args.get('correct', 0)|int >= 4 %}
-                        <div class="score">쿠민이 생존!</div>
+                        <img src="{{ url_for('static', filename='img/생존r.png') }}" alt="쿠민 생존 사진" width="400" height="400">
+                        <div class="msg">"구해줘서 고마워💖"</div>
+                        <div>&nbsp;&nbsp;&nbsp;</div>    
+                        <div class="state">쿠민이 생존!!</div>
                     {% else %}
-                        <div class="score">쿠민아 미안...</div>
+                        <img src="{{ url_for('static', filename='img/사망r.png') }}" alt="쿠민 사망 사진" width="400" height="400">
+                        <div class="msg">"그동안 고마ㅇ..."</div>
+                        <div>&nbsp;&nbsp;&nbsp;</div>    
+                        <div class="state">쿠민아 미안..😭</div>
                     {% endif %}
                 </div>
+                <div class = "message">⭕재난 상황별 행동 요령을 확인하고 싶다면?❌</div>&nbsp;&nbsp;&nbsp;
                 <br>
+                
                 <a href="https://www.safekorea.go.kr/idsiSFK/neo/sfk/cs/contents/prevent/prevent01.html?menuSeq=126" class="bttn" target="_blank">자연재난 행동요령</a> &nbsp;&nbsp;&nbsp;
                 <a href="https://www.safekorea.go.kr/idsiSFK/neo/sfk/cs/contents/prevent/SDIJKM5116_LIST.html?menuSeq=127" class="bttn" target="_blank">사회재난 행동요령</a>
                 <br>
                 <button id="restart-button" class="button" onclick="restartQuiz()">다시하기</button>
-                </div>
-                
             </div>
         </div>
-    </div>
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <!-- Bootstrap core JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Core theme JS -->
-    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/button_update.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/maps_ex.js') }}"></script>
-
-    
-    
-    </script>
-    
-    <script>
-        function restartQuiz() {
-            window.location.href = "/quiz/restart";
-        }
-    </script>
-</body>
-</html>
+        
+        </div>
+        
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <!-- Bootstrap core JS -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Core theme JS -->
+        <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/button_update.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/maps_ex.js') }}"></script>
+        
+        <script>
+            function restartQuiz() {
+                window.location.href = "/quiz";
+            }
+        </script>
+        </body>
+        </html>
+        

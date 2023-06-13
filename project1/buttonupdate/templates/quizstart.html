@@ -14,90 +14,97 @@
     <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
     <style>
         body {
-            text-align: center;
-            background-color: white;
-        }
+        text-align: center;
+        background-color: white;
+    }
 
-        .game {
-            margin: 0 auto;
-            width: 60vw;
-            padding: 50px 20px;
-            border: 1px solid black;
-            border-radius: 15px;
-            background-color: whitesmoke;
-            min-height: 80vh;
-        }
+    .game {
+        margin-top: 20px;
+        margin-bottom :20px;
+        margin-left:auto;
+        margin-right:auto;
+        width: 70vw;
+        padding: 50px 20px;
+        border-radius: 15px;
+        background-color: whitesmoke;
+        min-height: 80vh;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+        border: none;
+    }
 
-        .title {
-            width: 100%;
-            border-radius: 15px;
-            font-size: 22px;
-            height: 100px;
-        }
+    .title {
+        width: 100%;
+        border-radius: 15px;
+        font-size: 30px;
+        height: 100px;
+        font-style :oblique; 
+    }
 
-        .quiz {
-            width: 100%;
-            border: 1px solid black;
-            margin-bottom: 20px;
-            border-radius: 15px;
-            background-color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-        }
+    .quiz {
+        width: 100%;
+        border: 1px solid black;
+        margin-bottom: 20px;
+        border-radius: 15px;
+        background-color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        animation : fadeIn;
+    }
 
-        .quiz-question {
-            font-weight: 700;
-            margin-top: 8px;
-            font-size: 40;
-            margin-bottom: 20px;
-        }
+    .quiz-question {
+        font-weight: 700;
+        margin-top: 8px;
+        font-size: 40;
+        margin-bottom: 20px;
+    }
 
-        .quiz-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
+    .quiz-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
 
-        .button {
-            background-color: rgb(55, 102, 246);
-            margin-top: 20px;
-            border-radius: 10px;
-            padding: 10px 20px;
-            border: none;
-            outline: none;
-            margin-bottom: 10px;
+    .button {
+        background-color: rgb(55, 102, 246);
+        margin-top: 20px;
+        border-radius: 10px;
+        padding: 10px 20px;
+        border: none;
+        outline: none;
+        margin-bottom: 10px;
+        color: white;
+    }
 
-            color: white;
-        }
+    .button:hover {
+        cursor: pointer;
+    }
 
-        .button:hover {
-            cursor: pointer;
-        }
+    .true-button,
+    .false-button {
+        background-color: skyblue;
+        border: none;
+        margin-bottom: 5px;
+    }
 
-        .true-button,
-        .false-button {
-            background-color: skyblue;
-            border: none;
-            margin-bottom: 5px;
-        }
+    .true-button:active,
+    .false-button:active {
+        background-color: rgb(39, 63, 214);
+    }
 
-        .true-button:active,
-        .false-button:active {
-            background-color: rgb(39, 63, 214);
-        }
+    .true-button.clicked,
+    .false-button.clicked {
+        background-color: rgb(39, 63, 214);
+    }
 
-        .true-button.clicked,
-        .false-button.clicked {
-            background-color: rgb(39, 63, 214);
-        }
+    .quiz-title {
+        font-size: 18;
+        margin-top: 5px;
+        font-weight: 700;
+    }
 
-        .quiz-title {
-            font-size: 18;
-            margin-top: 5px;
-            font-weight: 700;
-        }
+    
     </style>
 </head>
 
@@ -184,8 +191,9 @@
                 <script>
                     // 서버에서 받은 데이터를 JavaScript 변수로 선언합니다.
                     var quizzes = {{ quizzes|tojson|safe }};
+                    
 
-                    // 제출 버튼을 클릭했을 때 실행할 함수를 정의합니다.
+                    
                     document.getElementById("quiz-form").addEventListener("submit", function(event) 
                     {
                         event.preventDefault(); // 폼의 기본 제출 동작을 방지합니다.
@@ -209,4 +217,4 @@
                         // 결과 페이지로 이동합니다. 정답 개수와 오답 개수를 URL 파라미터로 전달합니다.
                         window.location.href = `/quiz/result?correct=${correctCount}&incorrect=${incorrectCount}`;
                     });
-                </script>
+                    </script>

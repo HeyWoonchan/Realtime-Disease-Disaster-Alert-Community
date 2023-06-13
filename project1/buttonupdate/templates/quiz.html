@@ -10,6 +10,40 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom styles -->
     <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
+
+    <style>
+    @keyframes blink {
+        0% { opacity: 1; }
+        50% { opacity: 0; }
+        100% { opacity: 1; }
+    }
+
+    #startButton {
+        animation: blink 1.5s infinite;
+    }
+    
+    .game {
+        margin: 0 auto;
+        width: 60vw;
+        padding: 50px 20px;
+        border: 1px solid black;
+        border-radius: 15px;
+        background-color: white;
+        min-height: 80vh;
+    }
+
+    .game .text-center {
+        margin-top: 20px;
+    }
+
+    .game img {
+        margin-top: 20px;
+    }
+
+    .game .text-center > .btn {
+        margin-top: 20px;
+    }   
+</style>
 </head>
 <body>
     <div class="d-flex" id="wrapper">
@@ -56,12 +90,14 @@
             </nav>
             <!-- Page content -->
             <div class="container-fluid">
-                <h1 class="mt-4 text-center">재난에서 살아남기 : 쿠민이를 살려라!</h1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <div class="mt-4 text-center">
-                    <img src="{{ url_for('static', filename='img/쿠민.jpg') }}" alt="쿠민 사진">
-                </div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <div class="mt-10 text-center">&nbsp;&nbsp;&nbsp;
-                    <a class="btn btn-primary" href="#" id="startButton">Start</a>
+                <div class="game">
+                    <h1 class="mt-4 text-center">재난에서 살아남기 : 쿠민이를 살려라!</h1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="mt-4 text-center">
+                        <img src="{{ url_for('static', filename='img/쿠민.jpg') }}" alt="쿠민 사진" width="300" height="300">
+                    </div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="mt-10 text-center">&nbsp;&nbsp;&nbsp;
+                        <a class="btn btn-primary" href="#" id="startButton">Start</a>
+                    </div>
                 </div>
             </div>
         </div>

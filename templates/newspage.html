@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>질병 및 재난 알리미</title>
+        <!-- Favicon-->
+        <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='static/assets/favicon.ico') }}" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet" />
+        <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=oa0k1d1gao"></script>
+        <link href="{{ url_for('static', filename='css/style_custom.css') }}" rel="stylesheet" />
+        <script async
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnp17nNrPOjhrQk4Pp7HUVfMGzyqGw5eI&callback=initMap"> </script>
+        
+        <style>
+            
+
+            /* 팝업 스타일 */
+            #popup {
+                display: none;
+                position: fixed;
+                width: 100%;
+                height: 100%;
+                top: 0;
+                left: 0;
+                z-index: 100;
+                background-color: rgba(0, 0, 0, 0.5); /* 뒷 배경을 반투명하게 만듭니다. */
+            }
+
+            /* 닫기 버튼 스타일 */
+            #close {
+                position: absolute;
+                right: 10px;
+                top: 10px;
+                cursor: pointer;
+                color: white; /* 닫기 버튼 색상을 흰색으로 만듭니다. */
+            }
+
+            /* iframe 스타일 */
+            #content {
+                position: relative;
+                width: 80%;
+                height: 80%;
+                top: 10%;
+                left: 10%;
+                background-color: white;
+            }
+            tbody tr:hover {
+                background-color: lightgray;
+            }
+        </style>
+
+    </head>
+    <body>
+        <div class="d-flex" id="wrapper">
+            <!-- Sidebar-->
+            <div class="border-end bg-white" id="sidebar-wrapper">
+                <div class="sidebar-heading border-bottom bg-light">Start Bootstrap</div>
+                <div class="list-group list-group-flush">
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/">국내</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/newspage">국내 재난 뉴스</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/external">해외</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/community">커뮤니티</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/quiz">퀴즈</a>
+                </div>
+            </div>
+            <!-- Page content wrapper-->
+            <div id="page-content-wrapper">
+                <!-- Top navigation-->
+                <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+                    <div class="container-fluid">
+                        <button class="btn btn-primary" id="sidebarToggle">Toggle Menu</button>
+                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+                        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                            <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
+                                <li class="nav-item active"><a class="nav-link" href="#!">Home</a></li>
+                                <li class="nav-item"><a class="nav-link" href="#!">Link</a></li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Dropdown</a>
+                                    <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                        <a class="dropdown-item" href="#!">Action</a>
+                                        <a class="dropdown-item" href="#!">Another action</a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item" href="#!">Something else here</a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </nav>
+                <!-- Page content-->
+                <div class="container">
+                    <h1 class="mt-4">재난 관련 뉴스 모아보기</h1>
+                        <br>
+                        <div class="container mt-5">
+                            <div class="row">
+                                {% for item in thumnail %}
+                                <div class="col-md-4">
+                                    <div class="card" onclick="openPopup('{{ item.link }}')" style="width: 300px; height: 300px;">
+                                        <img src= "{{ item.thumbnail }}" class="card-img-top" style="height: 70%;">
+                                        <div class="card-body" style="height: 30%;">
+                                            <p class="card-text">{{ item.title }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-16">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Disaster</th>
+                                            <th>Title</th>
+                                            <th>Publication Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in data %}
+                                            <tr onclick="openPopup('{{ item.link }}')">
+                                                <td>{{ item.id }}</td>
+                                                <td>{{ item.disaster }}</td>
+                                                <td><strong>{{ item.title }}</strong></td>
+                                                <td>{{ item.pub_date }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        
+                    <div id="popup">
+                        <span id="close" onclick="closePopup()">닫기</span>
+                        <div id="content">
+                            <iframe id="originnews" src="" width="100%" height="100%"></iframe>
+                        </div>
+                    </div>
+                </div>
+        </div>
+        
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <!-- Bootstrap core JS-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Core theme JS-->
+        <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+
+        <script src="{{ url_for('static', filename='js/button_update.js') }}"></script>
+        
+        <script src="{{ url_for('static', filename='js/news.js') }}"></script>
+
+        
+
+    </body>
+</html>

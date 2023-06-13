@@ -816,8 +816,6 @@ def quiz_result_result():
 
 # 애플리케이션 실행
 if __name__ == "__main__":
-    #os.chdir("project1/buttonupdate")
-    os.path.dirname(os.path.abspath(__file__))
     with app.app_context():
         db.create_all()
     create_table()

@@ -532,7 +532,7 @@ def home():
        
         if current_time - last_execution_time >= 15:
             last_execution_time = current_time
-            update_msg_db()
+            #update_msg_db()
         print(current_time, last_execution_time)
         chart_data = get_chart_data()
         conn = sqlite3.connect(DB_comment)

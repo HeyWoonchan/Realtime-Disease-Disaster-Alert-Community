@@ -78,7 +78,7 @@
         <div class="d-flex" id="wrapper">
             <!-- Sidebar-->
             <div class="border-end bg-white" id="sidebar-wrapper">
-                <div class="sidebar-heading border-bottom bg-light">Start Bootstrap</div>
+                <div class="sidebar-heading border-bottom bg-light">재난 알리미</div>
                 <div class="list-group list-group-flush">
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/">국내</a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="/newspage">국내 재난 뉴스</a>
@@ -94,26 +94,33 @@
                     <div class="container-fluid">
                         <button class="btn btn-primary" id="sidebarToggle">Toggle Menu</button>
                         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
-                        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                            <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
-                                <li class="nav-item active"><a class="nav-link" href="#!">Home</a></li>
-                                <li class="nav-item"><a class="nav-link" href="#!">Link</a></li>
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Dropdown</a>
-                                    <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                        <a class="dropdown-item" href="#!">Action</a>
-                                        <a class="dropdown-item" href="#!">Another action</a>
-                                        <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item" href="#!">Something else here</a>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
+                        
                     </div>
                 </nav>
                 <!-- Page content-->
                 <div class="container-fluid">
                     <div class="container">
+                        <h2 class="mt-4"><b>최근 발생한 해외 재난</b></h2>
+                        <div class="card" style="height: 700px">
+                            <div id="map2" class="card-body"> </div>
+                        </div>
+                        
+                        <div class="row">
+                            {% for row in dataWD %}
+                            <div class="col-4">
+                                <div onclick="window.open('{{ row[4] }}')">
+                                    <div class="card" style="width: 385px;">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ row[2] }}</h5>
+                                            <p class="card-text">{{ row[3] }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> 
+                            {% endfor %}
+                        </div>
+                        <br>
+                        <br>
                         <h2 class="mt-4"><b>외교부 해외 안전공지</b></h2>
                         <div class="row">
                             <div class="col-sm-12 col-md-9">
@@ -145,28 +152,6 @@
                             </div> 
                             {% endfor %}
                         </div>
-                        <br>
-                        <br>
-                        <h2 class="mt-4"><b>최근 발생한 해외 재난</b></h2>
-                        <div class="card" style="height: 700px">
-                            <div id="map2" class="card-body"> </div>
-                        </div>
-                        
-                        <div class="row">
-                            {% for row in dataWD %}
-                            <div class="col-4">
-                                <div onclick="window.open('{{ row[4] }}')">
-                                    <div class="card" style="width: 385px;">
-                                        <div class="card-body">
-                                            <h5 class="card-title">{{ row[2] }}</h5>
-                                            <p class="card-text">{{ row[3] }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div> 
-                            {% endfor %}
-                        </div>
-                        
                     </div>
                     <hr>
                     

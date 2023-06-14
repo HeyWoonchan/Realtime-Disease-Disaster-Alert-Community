@@ -7,7 +7,14 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, SubmitField, SelectField
 from wtforms.validators import DataRequired 
+from flask_socketio import SocketIO
 
+
+
+app = Flask(__name__)
+secret_key = os.urandom(16)
+app.config['SECRET_KEY'] = 'secret_key'
+socketio = SocketIO(app)
 
 # 데이터베이스 파일 이름
 DB_disaster = 'disaster_merged.db'
@@ -310,6 +317,9 @@ def update_newsapi_naver() :
     conn = sqlite3.connect(DB_news_merged)
     cursor = conn.cursor()
 
+    cursor.execute("SELECT * FROM navernews ORDER BY id LIMIT 1")
+    last_list = cursor.fetchall()
+
     news_keywords = [
         "[속보] 풍수해",
         "[속보] 산사태",
@@ -323,7 +333,6 @@ def update_newsapi_naver() :
         "[속보] 정전",
         "[속보] 경계경보",
         "[속보] 공습경보",
-        "[속보] 사고",
         "[속보] 기상청"
     ]
     cursor.execute("DROP TABLE IF EXISTS navernews")
@@ -372,7 +381,7 @@ def update_newsapi_naver() :
                 title = title.replace(char, replacement)
             link = item['originallink']
             count1 = sum(itemm[2] == link for itemm in news_list)
-            count2 = sum(itemm[1] == link for itemm in news_list)
+            count2 = sum(itemm[1] == title for itemm in news_list)
 
             if count1 == 0 and count2 ==0:
                 date = item['pubDate']
@@ -383,6 +392,8 @@ def update_newsapi_naver() :
     news_list.sort(reverse=True)
     cursor.executemany("INSERT INTO navernews (pub_date, title, link, disaster) VALUES (?, ?, ?, ?)", news_list)
 
+    if news_list[1] == last_list :
+        socketio.emit('news_update', {'data': 'New news added'})
     conn.commit()
     conn.close()
 
@@ -696,6 +707,16 @@ def news():
     print(thumnail)
 
     return render_template('newspage.html', data=data, thumnail = thumnail)
+
+@socketio.on('connect')
+def handle_connect():
+    # 클라이언트가 연결되었을 때 실행될 로직
+    print('Client connected')
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    # 클라이언트가 연결을 끊었을 때 실행될 로직
+    print('Client disconnected')
 
 
 #커뮤니티 페이지 전용 ----------------
